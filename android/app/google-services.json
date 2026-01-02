@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "609134697330",
+    "project_id": "gonana-v2",
+    "storage_bucket": "gonana-v2.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:609134697330:android:7dbbff56dfb8c2f3b4dbeb",
+        "android_client_info": {
+          "package_name": "farm.gonana.gonana"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDGXAVDypeNXNlmAdOMjr58HQUAvfJoR2k"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
