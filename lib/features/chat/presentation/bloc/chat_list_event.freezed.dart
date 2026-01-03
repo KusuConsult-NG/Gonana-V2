@@ -55,12 +55,13 @@ extension ChatListEventPatterns on ChatListEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Started value)?  started,TResult Function( _ChatsUpdated value)?  chatsUpdated,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Started value)?  started,TResult Function( _ChatsUpdated value)?  chatsUpdated,TResult Function( _CreateChat value)?  createChat,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Started() when started != null:
 return started(_that);case _ChatsUpdated() when chatsUpdated != null:
-return chatsUpdated(_that);case _:
+return chatsUpdated(_that);case _CreateChat() when createChat != null:
+return createChat(_that);case _:
   return orElse();
 
 }
@@ -78,12 +79,13 @@ return chatsUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Started value)  started,required TResult Function( _ChatsUpdated value)  chatsUpdated,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Started value)  started,required TResult Function( _ChatsUpdated value)  chatsUpdated,required TResult Function( _CreateChat value)  createChat,}){
 final _that = this;
 switch (_that) {
 case _Started():
 return started(_that);case _ChatsUpdated():
-return chatsUpdated(_that);case _:
+return chatsUpdated(_that);case _CreateChat():
+return createChat(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -100,12 +102,13 @@ return chatsUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Started value)?  started,TResult? Function( _ChatsUpdated value)?  chatsUpdated,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Started value)?  started,TResult? Function( _ChatsUpdated value)?  chatsUpdated,TResult? Function( _CreateChat value)?  createChat,}){
 final _that = this;
 switch (_that) {
 case _Started() when started != null:
 return started(_that);case _ChatsUpdated() when chatsUpdated != null:
-return chatsUpdated(_that);case _:
+return chatsUpdated(_that);case _CreateChat() when createChat != null:
+return createChat(_that);case _:
   return null;
 
 }
@@ -122,11 +125,12 @@ return chatsUpdated(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  started,TResult Function( List<ChatEntity> chats)?  chatsUpdated,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  started,TResult Function( List<ChatEntity> chats)?  chatsUpdated,TResult Function( String otherUserId)?  createChat,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Started() when started != null:
 return started();case _ChatsUpdated() when chatsUpdated != null:
-return chatsUpdated(_that.chats);case _:
+return chatsUpdated(_that.chats);case _CreateChat() when createChat != null:
+return createChat(_that.otherUserId);case _:
   return orElse();
 
 }
@@ -144,11 +148,12 @@ return chatsUpdated(_that.chats);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  started,required TResult Function( List<ChatEntity> chats)  chatsUpdated,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  started,required TResult Function( List<ChatEntity> chats)  chatsUpdated,required TResult Function( String otherUserId)  createChat,}) {final _that = this;
 switch (_that) {
 case _Started():
 return started();case _ChatsUpdated():
-return chatsUpdated(_that.chats);case _:
+return chatsUpdated(_that.chats);case _CreateChat():
+return createChat(_that.otherUserId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -165,11 +170,12 @@ return chatsUpdated(_that.chats);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  started,TResult? Function( List<ChatEntity> chats)?  chatsUpdated,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  started,TResult? Function( List<ChatEntity> chats)?  chatsUpdated,TResult? Function( String otherUserId)?  createChat,}) {final _that = this;
 switch (_that) {
 case _Started() when started != null:
 return started();case _ChatsUpdated() when chatsUpdated != null:
-return chatsUpdated(_that.chats);case _:
+return chatsUpdated(_that.chats);case _CreateChat() when createChat != null:
+return createChat(_that.otherUserId);case _:
   return null;
 
 }
@@ -275,6 +281,72 @@ class __$ChatsUpdatedCopyWithImpl<$Res>
   return _then(_ChatsUpdated(
 null == chats ? _self._chats : chats // ignore: cast_nullable_to_non_nullable
 as List<ChatEntity>,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _CreateChat implements ChatListEvent {
+  const _CreateChat(this.otherUserId);
+  
+
+ final  String otherUserId;
+
+/// Create a copy of ChatListEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CreateChatCopyWith<_CreateChat> get copyWith => __$CreateChatCopyWithImpl<_CreateChat>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateChat&&(identical(other.otherUserId, otherUserId) || other.otherUserId == otherUserId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,otherUserId);
+
+@override
+String toString() {
+  return 'ChatListEvent.createChat(otherUserId: $otherUserId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CreateChatCopyWith<$Res> implements $ChatListEventCopyWith<$Res> {
+  factory _$CreateChatCopyWith(_CreateChat value, $Res Function(_CreateChat) _then) = __$CreateChatCopyWithImpl;
+@useResult
+$Res call({
+ String otherUserId
+});
+
+
+
+
+}
+/// @nodoc
+class __$CreateChatCopyWithImpl<$Res>
+    implements _$CreateChatCopyWith<$Res> {
+  __$CreateChatCopyWithImpl(this._self, this._then);
+
+  final _CreateChat _self;
+  final $Res Function(_CreateChat) _then;
+
+/// Create a copy of ChatListEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? otherUserId = null,}) {
+  return _then(_CreateChat(
+null == otherUserId ? _self.otherUserId : otherUserId // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

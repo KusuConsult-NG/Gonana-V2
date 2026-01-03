@@ -24,6 +24,14 @@ class ChatListBloc extends Bloc<ChatListEvent, ChatListState> {
         chatsUpdated: (e) async {
           emit(ChatListState.loaded(e.chats));
         },
+        createChat: (e) async {
+          emit(const ChatListState.loading());
+          final result = await _repository.createChat(e.otherUserId);
+          result.fold(
+            (error) => emit(ChatListState.error(error)),
+            (chatId) => emit(ChatListState.chatCreated(chatId)),
+          );
+        },
       );
     });
   }

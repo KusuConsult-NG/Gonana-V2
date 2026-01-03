@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../../../../core/utils/kyc_guard.dart';
 
 class SavingsDetailPage extends StatelessWidget {
   final Map<String, dynamic>? asset; // Mock asset data
@@ -180,7 +181,14 @@ class SavingsDetailPage extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.all(24.0),
           child: ElevatedButton(
-            onPressed: () => context.push('/savings/create'), // Top up
+            onPressed: () {
+              KycGuard.check(
+                context,
+                onVerified: () {
+                  context.push('/savings/create');
+                },
+              );
+            },
             style: ElevatedButton.styleFrom(
               backgroundColor: AppTheme.primaryColor,
               padding: const EdgeInsets.symmetric(vertical: 16),

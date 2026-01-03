@@ -121,6 +121,28 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<Either<String, AuthEntity>> getCurrentAuthentication() async {
+    try {
+      final user = _firebaseAuth.currentUser;
+      if (user == null) {
+        return const Left('No user logged in');
+      }
+
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      if (!userDoc.exists) {
+        return const Left('User data not found');
+      }
+
+      final userModel = UserModel.fromJson(userDoc.data()!);
+      final token = await user.getIdToken();
+
+      return Right(AuthEntity(user: userModel, token: token ?? ''));
+    } catch (e) {
+      return Left(e.toString());
+    }
+  }
+
+  @override
   Future<Either<String, void>> signOut() async {
     try {
       await _firebaseAuth.signOut();

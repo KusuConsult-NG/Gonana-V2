@@ -17,6 +17,10 @@ class AppTheme {
       surface: Colors.white,
       onSurface: Colors.black,
     ),
+    inputDecorationTheme: InputDecorationTheme(
+      hintStyle: GoogleFonts.outfit(color: Colors.grey[600]),
+      labelStyle: GoogleFonts.outfit(color: Colors.black87),
+    ),
     textTheme: GoogleFonts.outfitTextTheme(
       ThemeData.light().textTheme,
     ).apply(bodyColor: Colors.black, displayColor: Colors.black),
@@ -37,6 +41,10 @@ class AppTheme {
       secondary: secondaryColor,
       surface: Color(0xFF1E1E1E),
       onSurface: Colors.white,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      hintStyle: GoogleFonts.outfit(color: Colors.grey[300]),
+      labelStyle: GoogleFonts.outfit(color: Colors.white70),
     ),
     textTheme: GoogleFonts.outfitTextTheme(ThemeData.dark().textTheme).apply(
       bodyColor: Colors.white, // FORCE WHITE

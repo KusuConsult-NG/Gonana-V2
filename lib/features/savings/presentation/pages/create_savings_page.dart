@@ -183,7 +183,7 @@ class _CreateSavingsPageState extends State<CreateSavingsPage> {
             ),
             const Spacer(),
             if (_selectedToken == token)
-              Icon(Icons.check_circle, color: AppTheme.primaryColor),
+              const Icon(Icons.check_circle, color: AppTheme.primaryColor),
           ],
         ),
       ),

@@ -11,6 +11,7 @@ class PostEntity extends Equatable {
   final String? ownerPhoto;
   final DateTime? createdAt;
   final bool isLiked; // To handle UI state
+  final List<String> likedBy; // List of user IDs who liked the post
 
   const PostEntity({
     this.id,
@@ -23,6 +24,7 @@ class PostEntity extends Equatable {
     this.ownerPhoto,
     this.createdAt,
     this.isLiked = false,
+    this.likedBy = const [],
   });
 
   @override
@@ -37,5 +39,34 @@ class PostEntity extends Equatable {
     ownerPhoto,
     createdAt,
     isLiked,
+    likedBy,
   ];
+
+  PostEntity copyWith({
+    String? id,
+    String? body,
+    List<String>? images,
+    int? likesCount,
+    int? commentsCount,
+    String? ownerId,
+    String? ownerName,
+    String? ownerPhoto,
+    DateTime? createdAt,
+    bool? isLiked,
+    List<String>? likedBy,
+  }) {
+    return PostEntity(
+      id: id ?? this.id,
+      body: body ?? this.body,
+      images: images ?? this.images,
+      likesCount: likesCount ?? this.likesCount,
+      commentsCount: commentsCount ?? this.commentsCount,
+      ownerId: ownerId ?? this.ownerId,
+      ownerName: ownerName ?? this.ownerName,
+      ownerPhoto: ownerPhoto ?? this.ownerPhoto,
+      createdAt: createdAt ?? this.createdAt,
+      isLiked: isLiked ?? this.isLiked,
+      likedBy: likedBy ?? this.likedBy,
+    );
+  }
 }

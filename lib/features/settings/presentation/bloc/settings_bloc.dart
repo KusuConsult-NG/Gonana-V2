@@ -12,6 +12,48 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<Started>(_onStarted);
     on<LogoutRequested>(_onLogoutRequested);
     on<UpdateProfile>(_onUpdateProfile);
+    on<ChangePasswordRequested>(_onChangePassword);
+    on<ChangePinRequested>(_onChangePin);
+    on<ToggleBiometricsRequested>(_onToggleBiometrics);
+  }
+
+  Future<void> _onChangePassword(
+    ChangePasswordRequested event,
+    Emitter<SettingsState> emit,
+  ) async {
+    emit(const SettingsState.loading());
+    final result = await _repository.changePassword(
+      event.oldPassword,
+      event.newPassword,
+    );
+    result.fold(
+      (failure) => emit(SettingsState.error(failure)),
+      (_) => add(const Started()), // Refresh profile if needed or just success
+    );
+  }
+
+  Future<void> _onChangePin(
+    ChangePinRequested event,
+    Emitter<SettingsState> emit,
+  ) async {
+    emit(const SettingsState.loading());
+    final result = await _repository.changePin(event.oldPin, event.newPin);
+    result.fold(
+      (failure) => emit(SettingsState.error(failure)),
+      (_) => add(const Started()),
+    );
+  }
+
+  Future<void> _onToggleBiometrics(
+    ToggleBiometricsRequested event,
+    Emitter<SettingsState> emit,
+  ) async {
+    // Optimistic toggle could be done here if state had biometricsEnabled field
+    final result = await _repository.toggleBiometrics(event.enabled);
+    result.fold(
+      (failure) => emit(SettingsState.error(failure)),
+      (_) => add(const Started()),
+    );
   }
 
   Future<void> _onStarted(Started event, Emitter<SettingsState> emit) async {
@@ -74,6 +116,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
               newPhotoUrl ??
               currentUser.profilePhoto, // Use new URL or keep old
           bio: event.bio,
+          username: event.username,
         );
 
         final updateResult = await _repository.updateUserProfile(updatedUser);

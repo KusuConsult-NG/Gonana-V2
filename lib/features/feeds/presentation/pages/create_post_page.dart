@@ -3,8 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/glass_container.dart';
+import '../bloc/feed_bloc.dart';
+import '../bloc/feed_event.dart';
+import '../bloc/feed_state.dart';
 
 class CreatePostPage extends StatefulWidget {
   const CreatePostPage({super.key});
@@ -15,32 +18,48 @@ class CreatePostPage extends StatefulWidget {
 
 class _CreatePostPageState extends State<CreatePostPage> {
   final TextEditingController _captionController = TextEditingController();
-  File? _imageFile;
+  File? _selectedImage;
   final ImagePicker _picker = ImagePicker();
 
   Future<void> _pickImage() async {
     final XFile? image = await _picker.pickImage(source: ImageSource.gallery);
     if (image != null) {
       setState(() {
-        _imageFile = File(image.path);
+        _selectedImage = File(image.path);
       });
     }
+  }
+
+  void _removeImage() {
+    setState(() {
+      _selectedImage = null;
+    });
+  }
+
+  @override
+  void dispose() {
+    _captionController.dispose();
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
           'Create Post',
-          style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+          style: GoogleFonts.montserrat(
+            fontWeight: FontWeight.bold,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black87,
+          ),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
           icon: Icon(
-            Icons.arrow_back_ios,
+            Icons.close,
             color: Theme.of(context).brightness == Brightness.dark
                 ? Colors.white
                 : Colors.black87,
@@ -48,193 +67,175 @@ class _CreatePostPageState extends State<CreatePostPage> {
           onPressed: () => context.pop(),
         ),
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16.0),
-            child: TextButton(
-              onPressed: () {
-                if (_captionController.text.isNotEmpty) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Post functionality Coming Soon'),
+          BlocConsumer<FeedBloc, FeedState>(
+            listener: (context, state) {
+              state.maybeWhen(
+                loaded: (_) {
+                  // Post successful logic handled via button action or here if needed
+                },
+                orElse: () {},
+              );
+            },
+            builder: (context, state) {
+              return Padding(
+                padding: const EdgeInsets.only(right: 16.0),
+                child: TextButton(
+                  onPressed: state.maybeWhen(
+                    loading: () => null,
+                    orElse: () => () {
+                      final caption = _captionController.text;
+                      if (caption.isNotEmpty || _selectedImage != null) {
+                        context.read<FeedBloc>().add(
+                          FeedEvent.createPost(
+                            caption: caption,
+                            image: _selectedImage,
+                          ),
+                        );
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Post sent!')),
+                        );
+                        context.pop();
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Please enter a caption or add an image',
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: AppTheme.primaryColor,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24,
+                      vertical: 8,
                     ),
-                  );
-                  context.pop();
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Please enter a caption')),
-                  );
-                }
-              },
-              style: TextButton.styleFrom(
-                backgroundColor: AppTheme.primaryColor,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 20,
-                  vertical: 8,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                  ),
+                  child: state.maybeWhen(
+                    loading: () => const SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    ),
+                    orElse: () => Text(
+                      'Post',
+                      style: GoogleFonts.montserrat(
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
                 ),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-              ),
-              child: Text(
-                'Post',
-                style: GoogleFonts.montserrat(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
+              );
+            },
           ),
         ],
       ),
-      body: Stack(
-        children: [
-          // Background
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: Theme.of(context).brightness == Brightness.dark
-                    ? [
-                        const Color(0xFF1E1E1E),
-                        const Color(0xFF2C2C2C),
-                        const Color(0xFF000000),
-                      ]
-                    : [const Color(0xFFE0F7FA), const Color(0xFFE8F5E9)],
-              ),
+      body: SingleChildScrollView(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const CircleAvatar(
+                  backgroundImage: NetworkImage(
+                    'https://i.pravatar.cc/150?u=3',
+                  ),
+                  radius: 20,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TextField(
+                    controller: _captionController,
+                    maxLines: null,
+                    decoration: InputDecoration(
+                      hintText: "What's happening in your farm?",
+                      border: InputBorder.none,
+                      hintStyle: GoogleFonts.outfit(color: Colors.grey[500]),
+                    ),
+                    style: GoogleFonts.outfit(fontSize: 16),
+                  ),
+                ),
+              ],
             ),
-          ),
-          SafeArea(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+            if (_selectedImage != null) ...[
+              const SizedBox(height: 16),
+              Stack(
                 children: [
-                  // User Info (Mock)
-                  Row(
-                    children: [
-                      Container(
-                        width: 40,
-                        height: 40,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.grey[300],
-                          image: DecorationImage(
-                            image: const AssetImage(
-                              'assets/images/user_avatar.png',
-                            ),
-                            // Fallback to Icon if asset not found
-                            onError: (exception, stackTrace) {},
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                        child: const Icon(Icons.person, color: Colors.grey),
-                      ),
-                      const SizedBox(width: 12),
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'John Doe',
-                            style: GoogleFonts.montserrat(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                            ),
-                          ),
-                          Text(
-                            'Public',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 12,
-                              color: Colors.grey,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Caption Input
-                  GlassContainer(
-                    padding: EdgeInsets.zero,
+                  ClipRRect(
                     borderRadius: BorderRadius.circular(12),
-                    child: TextField(
-                      controller: _captionController,
-                      maxLines: 5,
-                      decoration: InputDecoration(
-                        hintText: "What's on your mind?",
-                        border: InputBorder.none,
-                        contentPadding: const EdgeInsets.all(16),
-                        hintStyle: TextStyle(color: Colors.grey[400]),
-                      ),
+                    child: Image.file(
+                      _selectedImage!,
+                      width: double.infinity,
+                      height: 300,
+                      fit: BoxFit.cover,
                     ),
                   ),
-                  const SizedBox(height: 16),
-
-                  // Image Preview
-                  if (_imageFile != null)
-                    Stack(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(12),
-                          child: Image.file(
-                            _imageFile!,
-                            width: double.infinity,
-                            height: 200,
-                            fit: BoxFit.cover,
-                          ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: _removeImage,
+                      child: Container(
+                        padding: const EdgeInsets.all(4),
+                        decoration: BoxDecoration(
+                          color: Colors.black.withValues(alpha: 0.5),
+                          shape: BoxShape.circle,
                         ),
-                        Positioned(
-                          top: 8,
-                          right: 8,
-                          child: GestureDetector(
-                            onTap: () {
-                              setState(() {
-                                _imageFile = null;
-                              });
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: const BoxDecoration(
-                                color: Colors.black54,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
-                                Icons.close,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            ),
-                          ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 20,
                         ),
-                      ],
-                    ),
-
-                  const SizedBox(height: 24),
-
-                  // Add Photo Button
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(Icons.image, color: AppTheme.primaryColor),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Add Photo',
-                          style: GoogleFonts.montserrat(
-                            color: AppTheme.primaryColor,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
+                      ),
                     ),
                   ),
                 ],
               ),
+            ],
+          ],
+        ),
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          border: Border(top: BorderSide(color: Colors.grey[200]!)),
+        ),
+        padding: const EdgeInsets.only(
+          left: 16,
+          right: 16,
+          bottom: 30, // Safe area + padding
+          top: 16,
+        ),
+        child: Row(
+          children: [
+            IconButton(
+              onPressed: _pickImage,
+              icon: const Icon(Icons.image_outlined, color: AppTheme.primaryColor),
             ),
-          ),
-        ],
+            IconButton(
+              onPressed: () {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(
+                    content: Text('Camera not available on simulator'),
+                  ),
+                );
+              },
+              icon: const Icon(
+                Icons.camera_alt_outlined,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

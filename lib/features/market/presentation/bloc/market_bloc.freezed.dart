@@ -55,12 +55,13 @@ extension MarketEventPatterns on MarketEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _LoadData value)?  loadData,TResult Function( _SearchProducts value)?  searchProducts,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _LoadData value)?  loadData,TResult Function( _SearchProducts value)?  searchProducts,TResult Function( _CreateProduct value)?  createProduct,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _LoadData() when loadData != null:
 return loadData(_that);case _SearchProducts() when searchProducts != null:
-return searchProducts(_that);case _:
+return searchProducts(_that);case _CreateProduct() when createProduct != null:
+return createProduct(_that);case _:
   return orElse();
 
 }
@@ -78,12 +79,13 @@ return searchProducts(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _LoadData value)  loadData,required TResult Function( _SearchProducts value)  searchProducts,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _LoadData value)  loadData,required TResult Function( _SearchProducts value)  searchProducts,required TResult Function( _CreateProduct value)  createProduct,}){
 final _that = this;
 switch (_that) {
 case _LoadData():
 return loadData(_that);case _SearchProducts():
-return searchProducts(_that);case _:
+return searchProducts(_that);case _CreateProduct():
+return createProduct(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -100,12 +102,13 @@ return searchProducts(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _LoadData value)?  loadData,TResult? Function( _SearchProducts value)?  searchProducts,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _LoadData value)?  loadData,TResult? Function( _SearchProducts value)?  searchProducts,TResult? Function( _CreateProduct value)?  createProduct,}){
 final _that = this;
 switch (_that) {
 case _LoadData() when loadData != null:
 return loadData(_that);case _SearchProducts() when searchProducts != null:
-return searchProducts(_that);case _:
+return searchProducts(_that);case _CreateProduct() when createProduct != null:
+return createProduct(_that);case _:
   return null;
 
 }
@@ -122,11 +125,12 @@ return searchProducts(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadData,TResult Function( String query)?  searchProducts,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadData,TResult Function( String query)?  searchProducts,TResult Function( String name,  double price,  String description,  String location,  double availableQuantity,  String unit,  double? shippingPrice,  List<File> images)?  createProduct,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LoadData() when loadData != null:
 return loadData();case _SearchProducts() when searchProducts != null:
-return searchProducts(_that.query);case _:
+return searchProducts(_that.query);case _CreateProduct() when createProduct != null:
+return createProduct(_that.name,_that.price,_that.description,_that.location,_that.availableQuantity,_that.unit,_that.shippingPrice,_that.images);case _:
   return orElse();
 
 }
@@ -144,11 +148,12 @@ return searchProducts(_that.query);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadData,required TResult Function( String query)  searchProducts,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadData,required TResult Function( String query)  searchProducts,required TResult Function( String name,  double price,  String description,  String location,  double availableQuantity,  String unit,  double? shippingPrice,  List<File> images)  createProduct,}) {final _that = this;
 switch (_that) {
 case _LoadData():
 return loadData();case _SearchProducts():
-return searchProducts(_that.query);case _:
+return searchProducts(_that.query);case _CreateProduct():
+return createProduct(_that.name,_that.price,_that.description,_that.location,_that.availableQuantity,_that.unit,_that.shippingPrice,_that.images);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -165,11 +170,12 @@ return searchProducts(_that.query);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadData,TResult? Function( String query)?  searchProducts,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadData,TResult? Function( String query)?  searchProducts,TResult? Function( String name,  double price,  String description,  String location,  double availableQuantity,  String unit,  double? shippingPrice,  List<File> images)?  createProduct,}) {final _that = this;
 switch (_that) {
 case _LoadData() when loadData != null:
 return loadData();case _SearchProducts() when searchProducts != null:
-return searchProducts(_that.query);case _:
+return searchProducts(_that.query);case _CreateProduct() when createProduct != null:
+return createProduct(_that.name,_that.price,_that.description,_that.location,_that.availableQuantity,_that.unit,_that.shippingPrice,_that.images);case _:
   return null;
 
 }
@@ -269,6 +275,92 @@ class __$SearchProductsCopyWithImpl<$Res>
   return _then(_SearchProducts(
 null == query ? _self.query : query // ignore: cast_nullable_to_non_nullable
 as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _CreateProduct implements MarketEvent {
+  const _CreateProduct({required this.name, required this.price, required this.description, required this.location, required this.availableQuantity, required this.unit, this.shippingPrice, final  List<File> images = const []}): _images = images;
+  
+
+ final  String name;
+ final  double price;
+ final  String description;
+ final  String location;
+ final  double availableQuantity;
+ final  String unit;
+ final  double? shippingPrice;
+ final  List<File> _images;
+@JsonKey() List<File> get images {
+  if (_images is EqualUnmodifiableListView) return _images;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_images);
+}
+
+
+/// Create a copy of MarketEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CreateProductCopyWith<_CreateProduct> get copyWith => __$CreateProductCopyWithImpl<_CreateProduct>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CreateProduct&&(identical(other.name, name) || other.name == name)&&(identical(other.price, price) || other.price == price)&&(identical(other.description, description) || other.description == description)&&(identical(other.location, location) || other.location == location)&&(identical(other.availableQuantity, availableQuantity) || other.availableQuantity == availableQuantity)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.shippingPrice, shippingPrice) || other.shippingPrice == shippingPrice)&&const DeepCollectionEquality().equals(other._images, _images));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,name,price,description,location,availableQuantity,unit,shippingPrice,const DeepCollectionEquality().hash(_images));
+
+@override
+String toString() {
+  return 'MarketEvent.createProduct(name: $name, price: $price, description: $description, location: $location, availableQuantity: $availableQuantity, unit: $unit, shippingPrice: $shippingPrice, images: $images)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CreateProductCopyWith<$Res> implements $MarketEventCopyWith<$Res> {
+  factory _$CreateProductCopyWith(_CreateProduct value, $Res Function(_CreateProduct) _then) = __$CreateProductCopyWithImpl;
+@useResult
+$Res call({
+ String name, double price, String description, String location, double availableQuantity, String unit, double? shippingPrice, List<File> images
+});
+
+
+
+
+}
+/// @nodoc
+class __$CreateProductCopyWithImpl<$Res>
+    implements _$CreateProductCopyWith<$Res> {
+  __$CreateProductCopyWithImpl(this._self, this._then);
+
+  final _CreateProduct _self;
+  final $Res Function(_CreateProduct) _then;
+
+/// Create a copy of MarketEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? name = null,Object? price = null,Object? description = null,Object? location = null,Object? availableQuantity = null,Object? unit = null,Object? shippingPrice = freezed,Object? images = null,}) {
+  return _then(_CreateProduct(
+name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
+as double,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,location: null == location ? _self.location : location // ignore: cast_nullable_to_non_nullable
+as String,availableQuantity: null == availableQuantity ? _self.availableQuantity : availableQuantity // ignore: cast_nullable_to_non_nullable
+as double,unit: null == unit ? _self.unit : unit // ignore: cast_nullable_to_non_nullable
+as String,shippingPrice: freezed == shippingPrice ? _self.shippingPrice : shippingPrice // ignore: cast_nullable_to_non_nullable
+as double?,images: null == images ? _self._images : images // ignore: cast_nullable_to_non_nullable
+as List<File>,
   ));
 }
 

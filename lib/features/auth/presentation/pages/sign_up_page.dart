@@ -219,6 +219,18 @@ class _SignupPageState extends State<SignupPage> {
                                       ],
                                     ),
                                   ),
+                                  const SizedBox(height: 8),
+                                  Align(
+                                    alignment: Alignment.centerLeft,
+                                    child: Text(
+                                      'Please use your official names as they appear on your Government ID for KYC verification.',
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 11,
+                                        color: Colors.orangeAccent[700],
+                                        fontStyle: FontStyle.italic,
+                                      ),
+                                    ),
+                                  ),
                                   const SizedBox(height: 16),
                                   FadeInUp(
                                     delay: const Duration(milliseconds: 600),

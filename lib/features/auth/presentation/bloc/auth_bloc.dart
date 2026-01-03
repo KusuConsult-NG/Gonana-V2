@@ -20,9 +20,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onStarted(Started event, Emitter<AuthState> emit) async {
-    // Check for persisted token here if implementing persistence
-    // For now, start unauthenticated
-    emit(const AuthState.unauthenticated());
+    emit(const AuthState.loading());
+    final result = await _repository.getCurrentAuthentication();
+    result.fold(
+      (failure) => emit(const AuthState.unauthenticated()),
+      (auth) => emit(AuthState.authenticated(auth)),
+    );
   }
 
   Future<void> _onBiometricLoginRequested(

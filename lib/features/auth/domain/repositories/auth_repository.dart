@@ -16,5 +16,6 @@ abstract class AuthRepository {
   });
   Future<Either<String, void>> forgotPassword({required String email});
   Future<Either<String, void>> signOut();
+  Future<Either<String, AuthEntity>> getCurrentAuthentication();
   Future<Either<String, bool>> authenticateBiometric();
 }

@@ -11,7 +11,6 @@ ProductModel _$ProductModelFromJson(Map<String, dynamic> json) => ProductModel(
   title: json['title'] as String,
   amount: (json['amount'] as num).toDouble(),
   usdPrice: (json['usdPrice'] as num?)?.toDouble(),
-  imageUrl: json['imageUrl'] as String,
   description: json['description'] as String,
   isHotDeal: json['isHotDeal'] as bool? ?? false,
   discountPercentage: (json['discountPercentage'] as num?)?.toDouble(),
@@ -20,6 +19,14 @@ ProductModel _$ProductModelFromJson(Map<String, dynamic> json) => ProductModel(
   shippingMethods: (json['shippingMethods'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  sellerId: json['sellerId'] as String?,
+  sellerName: json['sellerName'] as String?,
+  sellerPhoto: json['sellerPhoto'] as String?,
+  unit: json['unit'] as String?,
+  availableQuantity: (json['availableQuantity'] as num?)?.toDouble(),
+  shippingPrice: (json['shippingPrice'] as num?)?.toDouble(),
+  rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
+  reviewCount: (json['reviewCount'] as num?)?.toInt() ?? 0,
 );
 
 Map<String, dynamic> _$ProductModelToJson(ProductModel instance) =>
@@ -28,11 +35,18 @@ Map<String, dynamic> _$ProductModelToJson(ProductModel instance) =>
       'title': instance.title,
       'amount': instance.amount,
       'usdPrice': instance.usdPrice,
-      'imageUrl': instance.imageUrl,
       'description': instance.description,
       'isHotDeal': instance.isHotDeal,
       'discountPercentage': instance.discountPercentage,
       'location': instance.location,
       'quantity': instance.quantity,
+      'rating': instance.rating,
+      'reviewCount': instance.reviewCount,
       'shippingMethods': instance.shippingMethods,
+      'sellerId': instance.sellerId,
+      'sellerName': instance.sellerName,
+      'sellerPhoto': instance.sellerPhoto,
+      'unit': instance.unit,
+      'availableQuantity': instance.availableQuantity,
+      'shippingPrice': instance.shippingPrice,
     };

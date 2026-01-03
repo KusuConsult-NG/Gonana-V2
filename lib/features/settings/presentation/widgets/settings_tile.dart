@@ -51,7 +51,8 @@ class SettingsTile extends StatelessWidget {
             style: GoogleFonts.montserrat(
               fontSize: 12,
               color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.grey[400]
+                  ? Colors
+                        .white70 // Brighter for dark mode
                   : Colors.grey[700],
             ),
           ),
@@ -59,7 +60,8 @@ class SettingsTile extends StatelessWidget {
             Icons.arrow_forward_ios,
             size: 16,
             color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.grey[400]
+                ? Colors
+                      .white70 // Brighter arrow
                 : Colors.grey,
           ),
           onTap: onTap,

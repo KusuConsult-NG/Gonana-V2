@@ -8,6 +8,11 @@ import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/primary_button.dart';
 import '../bloc/cart_bloc.dart';
 
+import '../widgets/logistics_selection_widget.dart';
+import '../../../../core/utils/kyc_guard.dart';
+import '../../domain/entities/product_entity.dart';
+// import '../../data/models/product_model.dart';
+
 class CartPage extends StatelessWidget {
   const CartPage({super.key});
 
@@ -156,6 +161,8 @@ class CartPage extends StatelessWidget {
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
                         children: [
+                          const LogisticsSelectionWidget(),
+                          const SizedBox(height: 24),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
@@ -180,20 +187,29 @@ class CartPage extends StatelessWidget {
                           PrimaryButton(
                             text: 'Proceed to Checkout',
                             onPressed: () {
-                              // Pass the FIRST item for now as PaymentPage handles one product
-                              // Enhanced payment page might handle list later
-                              if (state.items.isNotEmpty) {
-                                final total = state.totalAmount;
-                                context.push(
-                                  '/payment',
-                                  extra: {
-                                    'name':
-                                        'Cart Checkout (${state.items.length} items)',
-                                    'price': total,
-                                    'currency': 'NGN',
-                                  },
-                                );
-                              }
+                              KycGuard.check(
+                                context,
+                                onVerified: () {
+                                  if (state.items.isNotEmpty) {
+                                    final firstItem = state.items.first;
+                                    final checkoutProduct = ProductEntity(
+                                      id: 'cart_checkout',
+                                      title:
+                                          'Cart Checkout (${state.items.length} items)',
+                                      amount: state.totalAmount,
+                                      images: [firstItem.imageUrl],
+                                      description: 'Marketplace Checkout',
+                                      sellerId: firstItem.sellerId,
+                                      sellerName: firstItem.sellerName,
+                                    );
+
+                                    context.push(
+                                      '/payment',
+                                      extra: checkoutProduct,
+                                    );
+                                  }
+                                },
+                              );
                             },
                           ),
                         ],

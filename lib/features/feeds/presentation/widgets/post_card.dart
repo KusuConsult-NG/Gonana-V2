@@ -8,6 +8,7 @@ class PostCard extends StatelessWidget {
   final VoidCallback? onLike;
   final VoidCallback? onReply;
   final VoidCallback? onRepost;
+  final VoidCallback? onDelete;
 
   const PostCard({
     super.key,
@@ -15,15 +16,18 @@ class PostCard extends StatelessWidget {
     this.onLike,
     this.onReply,
     this.onRepost,
+    this.onDelete,
   });
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return GlassContainer(
       padding: const EdgeInsets.all(16.0),
       borderRadius: BorderRadius.circular(20),
       opacity: 0.6,
       blur: 15,
+      color: isDark ? Colors.black : Colors.white,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -47,19 +51,35 @@ class PostCard extends StatelessWidget {
                     style: GoogleFonts.montserrat(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
+                      color: isDark ? Colors.white : Colors.black87,
                     ),
                   ),
                   Text(
                     '2 hours ago', // Placeholder for now
                     style: GoogleFonts.montserrat(
                       fontSize: 12,
-                      color: Colors.grey,
+                      color: isDark ? Colors.grey[400] : Colors.grey[700],
                     ),
                   ),
                 ],
               ),
               const Spacer(),
-              IconButton(icon: const Icon(Icons.more_horiz), onPressed: () {}),
+              if (onDelete != null)
+                PopupMenuButton<String>(
+                  onSelected: (value) {
+                    if (value == 'delete') onDelete?.call();
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'delete',
+                      child: Text('Delete Post'),
+                    ),
+                  ],
+                  icon: Icon(
+                    Icons.more_horiz,
+                    color: isDark ? Colors.white : Colors.black54,
+                  ),
+                ),
             ],
           ),
           const SizedBox(height: 12),
@@ -67,7 +87,11 @@ class PostCard extends StatelessWidget {
           if (post.body != null) ...[
             Text(
               post.body!,
-              style: GoogleFonts.montserrat(fontSize: 14, height: 1.5),
+              style: GoogleFonts.montserrat(
+                fontSize: 14,
+                height: 1.5,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
             ),
             const SizedBox(height: 12),
           ],
@@ -100,7 +124,10 @@ class PostCard extends StatelessWidget {
               ),
               Text(
                 '${post.likesCount}',
-                style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
+                style: GoogleFonts.montserrat(
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
               ),
               const SizedBox(width: 16),
               IconButton(
@@ -109,7 +136,10 @@ class PostCard extends StatelessWidget {
               ),
               Text(
                 '${post.commentsCount}',
-                style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
+                style: GoogleFonts.montserrat(
+                  fontWeight: FontWeight.w600,
+                  color: isDark ? Colors.white : Colors.black87,
+                ),
               ),
               const Spacer(),
               IconButton(

@@ -45,3 +45,21 @@ This project follows a **Feature-First Clean Architecture**:
 ## Contact
 
 For support or inquiries, please contact the Gonana team.
+
+## Developer Notes (Handoff)
+
+### recent Changes
+*   **PIN Creation Flow**: A secure PIN creation screen has been added (`CreatePinPage`). It is **gated by KYC** status.
+*   **Withdrawals**: Now require PIN verification. The textfield for PIN input uses a custom widget `PinVerificationDialog`.
+*   **Mock Repositories**: Currently, `FeedRepository` and `MarketRepository` are using **Mock Data** (`MockFeedRepository`, `MockMarketRepository`) for stability. To switch to Real Data (Firebase), update `injectable` annotations in the respective files and re-run build_runner.
+
+### Key Commands
+*   **Run App**: `flutter run`
+*   **Generate Code**: `dart run build_runner build --delete-conflicting-outputs` (Run this after any model/bloc changes)
+*   **Analyze**: `flutter analyze`
+
+### Setup Instructions
+1.  **Flutter**: Ensure Flutter SDK is installed (Stable channel).
+2.  **Firebase**: Project is configured for `farm.gonana.gonana`. `google-services.json` is present in `android/app`.
+3.  **Dependencies**: Run `flutter pub get`.
+

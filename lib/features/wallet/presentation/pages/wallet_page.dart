@@ -4,11 +4,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:share_plus/share_plus.dart';
 import '../../../../config/injection.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../domain/entities/transaction_entity.dart';
 import '../../domain/entities/wallet_entity.dart';
+import '../../../../core/widgets/scaffold_with_background.dart';
+import '../../../../core/utils/kyc_guard.dart';
+import '../../../../core/widgets/kyc_banner.dart';
 import '../bloc/wallet_bloc.dart';
 
 class WalletPage extends StatelessWidget {
@@ -36,17 +40,21 @@ class _WalletViewState extends State<_WalletView> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldWithBackground(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
           'Wallet',
           style: GoogleFonts.montserrat(
-            color: Colors.black87,
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.white
+                : Colors.black87,
             fontWeight: FontWeight.bold,
           ),
         ),
-        backgroundColor: Colors.white.withValues(alpha: 0.1),
+        backgroundColor: Theme.of(context).brightness == Brightness.dark
+            ? Colors.black.withValues(alpha: 0.2)
+            : Colors.white.withValues(alpha: 0.1),
         flexibleSpace: ClipRRect(
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
@@ -56,112 +64,152 @@ class _WalletViewState extends State<_WalletView> {
         elevation: 0,
         centerTitle: true,
       ),
-      body: Stack(
-        children: [
-          // Animated Background
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: Theme.of(context).brightness == Brightness.dark
-                    ? [
-                        const Color(0xFF1E1E1E),
-                        const Color(0xFF2C2C2C),
-                        const Color(0xFF000000),
-                      ]
-                    : [
-                        const Color(0xFFE0F7FA), // Light Cyan
-                        const Color(0xFFE8F5E9), // Light Green
-                        const Color(0xFFF3E5F5), // Light Purple
-                      ],
-              ),
-            ),
-          ),
-          // Orbs
-          Positioned(
-            top: 100,
-            left: -50,
-            child: FadeIn(
-              duration: const Duration(seconds: 2),
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  color: Colors.purple.withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.purple.withValues(alpha: 0.15),
-                      blurRadius: 100,
-                      spreadRadius: 30,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // Content
-          SafeArea(
-            child: BlocBuilder<WalletBloc, WalletState>(
-              builder: (context, state) {
-                return state.when(
-                  initial: () => const SizedBox.shrink(),
-                  loading: () =>
-                      const Center(child: CircularProgressIndicator()),
-                  error: (message) => Center(child: Text('Error: $message')),
-                  loaded: (wallet, transactions) {
-                    return SingleChildScrollView(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          FadeInDown(
-                            duration: const Duration(milliseconds: 800),
-                            child: _buildBalanceCard(wallet),
-                          ),
-                          const SizedBox(height: 24),
-                          FadeInDown(
-                            delay: const Duration(milliseconds: 200),
-                            duration: const Duration(milliseconds: 600),
-                            child: _buildActionButtons(),
-                          ),
-                          const SizedBox(height: 24),
-                          FadeInLeft(
-                            delay: const Duration(milliseconds: 400),
-                            child: Text(
-                              'Crypto Assets',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          _buildCryptoList(wallet),
-                          const SizedBox(height: 24),
-                          FadeInLeft(
-                            delay: const Duration(milliseconds: 600),
-                            child: Text(
-                              'Transaction History',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 12),
-                          _buildTransactionList(transactions),
-                        ],
+      body: SafeArea(
+        child: BlocBuilder<WalletBloc, WalletState>(
+          builder: (context, state) {
+            return state.when(
+              initial: () => const SizedBox.shrink(),
+              loading: () => const Center(child: CircularProgressIndicator()),
+              error: (message) => Center(child: Text('Error: $message')),
+              loaded: (wallet, transactions) {
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.all(16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const KycBanner(),
+                      const SizedBox(height: 8),
+                      FadeInDown(
+                        duration: const Duration(milliseconds: 800),
+                        child: _buildBalanceCard(wallet),
                       ),
-                    );
-                  },
+                      const SizedBox(height: 24),
+                      FadeInDown(
+                        delay: const Duration(milliseconds: 200),
+                        duration: const Duration(milliseconds: 600),
+                        child: _buildActionButtons(),
+                      ),
+                      const SizedBox(height: 24),
+                      if (wallet.cryptoAddresses != null &&
+                          wallet.cryptoAddresses!.isNotEmpty) ...[
+                        FadeInLeft(
+                          delay: const Duration(milliseconds: 300),
+                          child: Text(
+                            'Your Multichain Addresses',
+                            style: GoogleFonts.montserrat(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color:
+                                  Theme.of(context).brightness ==
+                                      Brightness.dark
+                                  ? Colors.white
+                                  : Colors.black87,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                        ...wallet.cryptoAddresses!.entries.map((entry) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: GlassContainer(
+                              padding: const EdgeInsets.all(12),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 14,
+                                    backgroundColor: AppTheme.primaryColor
+                                        .withValues(alpha: 0.2),
+                                    child: const Icon(
+                                      Icons.wallet,
+                                      size: 14,
+                                      color: AppTheme.primaryColor,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          entry.key,
+                                          style: GoogleFonts.montserrat(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                          ),
+                                        ),
+                                        Text(
+                                          entry.value,
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color:
+                                                Theme.of(context).brightness ==
+                                                    Brightness.dark
+                                                ? Colors.white70
+                                                : Colors.black87,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  IconButton(
+                                    icon: const Icon(Icons.copy, size: 18),
+                                    onPressed: () {
+                                      // Copy to clipboard logic
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        }),
+                        const SizedBox(height: 24),
+                      ],
+                      FadeInLeft(
+                        delay: const Duration(milliseconds: 400),
+                        child: Text(
+                          'Crypto Assets',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildCryptoList(wallet),
+                      const SizedBox(height: 24),
+                      FadeInLeft(
+                        delay: const Duration(milliseconds: 600),
+                        child: Text(
+                          'Transaction History',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      _buildTransactionList(transactions),
+                    ],
+                  ),
                 );
               },
-            ),
-          ),
-        ],
+            );
+          },
+        ),
       ),
     );
   }
@@ -231,25 +279,35 @@ class _WalletViewState extends State<_WalletView> {
             ),
           ),
           const SizedBox(height: 24),
-          GlassContainer(
-            color: Colors.black.withValues(alpha: 0.2),
-            borderRadius: BorderRadius.circular(12),
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '2348012345678',
-                  style: GoogleFonts.montserrat(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    fontSize: 16,
-                    letterSpacing: 1.2,
-                  ),
-                ),
-                const Icon(Icons.copy, color: Colors.white, size: 20),
-              ],
+          if (wallet.virtualAccountNumber != null) ...[
+            Text(
+              wallet.bankName ?? 'Virtual Account',
+              style: GoogleFonts.montserrat(
+                color: Colors.white.withValues(alpha: 0.8),
+                fontSize: 12,
+              ),
             ),
-          ),
+            const SizedBox(height: 4),
+            GlassContainer(
+              color: Colors.black.withValues(alpha: 0.2),
+              borderRadius: BorderRadius.circular(12),
+              padding: const EdgeInsets.all(12),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    wallet.virtualAccountNumber!,
+                    style: GoogleFonts.montserrat(
+                      color: Colors.white.withValues(alpha: 0.9),
+                      fontSize: 16,
+                      letterSpacing: 1.2,
+                    ),
+                  ),
+                  const Icon(Icons.copy, color: Colors.white, size: 20),
+                ],
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -264,7 +322,12 @@ class _WalletViewState extends State<_WalletView> {
             label: 'Deposit',
             color: AppTheme.primaryColor,
             onTap: () {
-              context.push('/wallet/deposit');
+              KycGuard.check(
+                context,
+                onVerified: () {
+                  context.push('/wallet/deposit');
+                },
+              );
             },
           ),
         ),
@@ -275,7 +338,12 @@ class _WalletViewState extends State<_WalletView> {
             label: 'Withdraw',
             color: Colors.orange,
             onTap: () {
-              context.push('/wallet/withdraw');
+              KycGuard.check(
+                context,
+                onVerified: () {
+                  context.push('/wallet/withdraw');
+                },
+              );
             },
           ),
         ),
@@ -286,7 +354,12 @@ class _WalletViewState extends State<_WalletView> {
             label: 'Savings',
             color: Colors.purple,
             onTap: () {
-              context.push('/savings');
+              KycGuard.check(
+                context,
+                onVerified: () {
+                  context.push('/savings');
+                },
+              );
             },
           ),
         ),
@@ -297,7 +370,12 @@ class _WalletViewState extends State<_WalletView> {
             label: 'Staking',
             color: Colors.orange,
             onTap: () {
-              context.push('/staking');
+              KycGuard.check(
+                context,
+                onVerified: () {
+                  context.push('/staking');
+                },
+              );
             },
           ),
         ),
@@ -369,7 +447,9 @@ class _WalletViewState extends State<_WalletView> {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
           padding: const EdgeInsets.all(24),
           opacity: 0.9,
-          color: Colors.white,
+          color: Theme.of(context).brightness == Brightness.dark
+              ? const Color(0xFF1E1E1E)
+              : Colors.white,
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -470,20 +550,37 @@ class _WalletViewState extends State<_WalletView> {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Text(
-            title,
-            style: GoogleFonts.montserrat(
-              color: Theme.of(context).brightness == Brightness.dark
-                  ? Colors.white70
-                  : Colors.black87,
+          Expanded(
+            child: Text(
+              title,
+              style: GoogleFonts.montserrat(
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white70
+                    : Colors.black87,
+              ),
             ),
           ),
-          Text(
-            amount,
-            style: GoogleFonts.montserrat(
-              fontWeight: FontWeight.bold,
-              color: isCredit ? Colors.green : Colors.red,
-            ),
+          Row(
+            children: [
+              Text(
+                amount,
+                style: GoogleFonts.montserrat(
+                  fontWeight: FontWeight.bold,
+                  color: isCredit ? Colors.green : Colors.red,
+                ),
+              ),
+              IconButton(
+                icon: const Icon(Icons.share, size: 20, color: Colors.grey),
+                onPressed: () {
+                  SharePlus.instance.share(
+                    ShareParams(
+                      text:
+                          'Transaction Details:\n$title\n$amount\nStatus: Success',
+                    ),
+                  );
+                },
+              ),
+            ],
           ),
         ],
       ),
@@ -509,6 +606,9 @@ class _WalletViewState extends State<_WalletView> {
             blur: 5,
             padding: const EdgeInsets.all(12),
             borderRadius: BorderRadius.circular(12),
+            color: Theme.of(context).brightness == Brightness.dark
+                ? Colors.black
+                : Colors.white,
             child: Row(
               children: [
                 Container(
@@ -527,35 +627,64 @@ class _WalletViewState extends State<_WalletView> {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        tx.description,
-                        style: GoogleFonts.montserrat(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                  child: InkWell(
+                    onTap: () {
+                      context.push('/wallet/transaction-details', extra: tx);
+                    },
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          tx.description,
+                          style: GoogleFonts.montserrat(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                          ),
                         ),
-                      ),
-                      Text(
-                        tx.date.toString().substring(0, 16),
-                        style: GoogleFonts.montserrat(
-                          fontSize: 12,
-                          color: Theme.of(context).brightness == Brightness.dark
-                              ? Colors.grey[400]
-                              : Colors.grey[700],
+                        Text(
+                          tx.date.toString().substring(0, 16),
+                          style: GoogleFonts.montserrat(
+                            fontSize: 12,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.grey[400]
+                                : Colors.grey[700],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-                Text(
-                  '${isCredit ? "+" : "-"} NGN ${tx.amount.toStringAsFixed(2)}',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color: isCredit ? Colors.green : Colors.red,
-                  ),
+                Row(
+                  children: [
+                    Text(
+                      '${isCredit ? "+" : "-"} NGN ${tx.amount.toStringAsFixed(2)}',
+                      style: GoogleFonts.montserrat(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: isCredit ? Colors.green : Colors.red,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(
+                        Icons.share,
+                        size: 18,
+                        color: Colors.grey,
+                      ),
+                      onPressed: () {
+                        SharePlus.instance.share(
+                          ShareParams(
+                            text:
+                                'Transaction Receipt\n${tx.description}\nDate: ${tx.date}\nAmount: NGN ${tx.amount.toStringAsFixed(2)}\nType: ${tx.type.name.toUpperCase()}\nStatus: ${tx.status.name.toUpperCase()}',
+                          ),
+                        );
+                      },
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -605,6 +734,9 @@ class _ActionButton extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         opacity: 0.6,
         blur: 15,
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.black
+            : Colors.white,
         child: Column(
           children: [
             Icon(icon, color: color),
@@ -614,6 +746,9 @@ class _ActionButton extends StatelessWidget {
               style: GoogleFonts.montserrat(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black87,
               ),
             ),
           ],
@@ -647,6 +782,9 @@ class _CryptoItem extends StatelessWidget {
         padding: const EdgeInsets.all(16),
         opacity: 0.5,
         borderRadius: BorderRadius.circular(16),
+        color: Theme.of(context).brightness == Brightness.dark
+            ? Colors.black
+            : Colors.white,
         child: Row(
           children: [
             Container(
@@ -673,6 +811,9 @@ class _CryptoItem extends StatelessWidget {
                   style: GoogleFonts.montserrat(
                     fontWeight: FontWeight.bold,
                     fontSize: 16,
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : Colors.black87,
                   ),
                 ),
                 Text(
@@ -692,6 +833,9 @@ class _CryptoItem extends StatelessWidget {
               style: GoogleFonts.montserrat(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black87,
               ),
             ),
           ],

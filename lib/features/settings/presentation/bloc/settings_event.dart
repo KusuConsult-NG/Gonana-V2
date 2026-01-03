@@ -12,5 +12,19 @@ class SettingsEvent with _$SettingsEvent {
     required String lastName,
     File? profilePhoto,
     String? bio,
+    String? username,
   }) = UpdateProfile;
+
+  const factory SettingsEvent.changePasswordRequested({
+    required String oldPassword,
+    required String newPassword,
+  }) = ChangePasswordRequested;
+
+  const factory SettingsEvent.changePinRequested({
+    required String oldPin,
+    required String newPin,
+  }) = ChangePinRequested;
+
+  const factory SettingsEvent.toggleBiometricsRequested(bool enabled) =
+      ToggleBiometricsRequested;
 }

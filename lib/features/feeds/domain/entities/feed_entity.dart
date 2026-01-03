@@ -10,4 +10,11 @@ class FeedEntity extends Equatable {
 
   @override
   List<Object?> get props => [posts, stories];
+
+  FeedEntity copyWith({List<PostEntity>? posts, List<StoryEntity>? stories}) {
+    return FeedEntity(
+      posts: posts ?? this.posts,
+      stories: stories ?? this.stories,
+    );
+  }
 }

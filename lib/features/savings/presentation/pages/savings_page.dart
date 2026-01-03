@@ -1,17 +1,20 @@
-import 'dart:ui';
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/utils/kyc_guard.dart';
 import '../../../../core/widgets/glass_container.dart';
-import '../../data/savings_dummy_data.dart';
+import '../../../../core/widgets/scaffold_with_background.dart';
+import '../bloc/savings_bloc.dart';
+import '../bloc/savings_state.dart';
 
 class SavingsPage extends StatelessWidget {
   const SavingsPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldWithBackground(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
@@ -24,12 +27,6 @@ class SavingsPage extends StatelessWidget {
           ),
         ),
         backgroundColor: Colors.transparent,
-        flexibleSpace: ClipRRect(
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
-            child: Container(color: Colors.transparent),
-          ),
-        ),
         elevation: 0,
         leading: IconButton(
           icon: Icon(
@@ -41,203 +38,187 @@ class SavingsPage extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      body: Stack(
-        children: [
-          // Background
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: Theme.of(context).brightness == Brightness.dark
-                    ? [
-                        const Color(0xFF1E1E1E),
-                        const Color(0xFF2C2C2C),
-                        const Color(0xFF000000),
-                      ]
-                    : [
-                        const Color(0xFFE0F7FA), // Light Cyan
-                        const Color(0xFFE8F5E9), // Light Green
-                        const Color(0xFFF3E5F5), // Light Purple
-                      ],
-              ),
-            ),
-          ),
+      body: BlocBuilder<SavingsBloc, SavingsState>(
+        builder: (context, state) {
+          return state.maybeWhen(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (message) => Center(child: Text('Error: $message')),
+            loaded: (assets, userSavings) {
+              final totalBalance = userSavings.fold<double>(
+                0,
+                (prev, element) => prev + element.balance,
+              );
 
-          // Orb
-          Positioned(
-            top: 100,
-            left: -50,
-            child: FadeIn(
-              duration: const Duration(seconds: 2),
-              child: Container(
-                width: 300,
-                height: 300,
-                decoration: BoxDecoration(
-                  color: const Color(0xFF29844B).withValues(alpha: 0.15),
-                  shape: BoxShape.circle,
-                  boxShadow: [
-                    BoxShadow(
-                      color: const Color(0xFF29844B).withValues(alpha: 0.15),
-                      blurRadius: 100,
-                      spreadRadius: 30,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          SafeArea(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(20),
-              itemCount: mockSavingsAssets.length + 1,
-              itemBuilder: (context, index) {
-                if (index == 0) {
-                  return FadeInDown(
-                    child: Padding(
-                      padding: const EdgeInsets.only(bottom: 20),
-                      child: GlassContainer(
-                        borderRadius: BorderRadius.circular(20),
-                        child: Column(
-                          children: [
-                            Text(
-                              'Total Savings',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 14,
-                                color: Colors.grey,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '₦ 2,500,000.00',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: const Color(0xFF29844B),
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              '+12.5% APY (Avg)',
-                              style: GoogleFonts.montserrat(
-                                fontSize: 12,
-                                color: Colors.green,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                }
-
-                final asset = mockSavingsAssets[index - 1];
-                return FadeInUp(
-                  delay: Duration(milliseconds: index * 100),
-                  child: Padding(
-                    padding: const EdgeInsets.only(bottom: 16),
-                    child: GestureDetector(
-                      onTap: () {
-                        // Transform asset to map for detail page
-                        context.push(
-                          '/savings/detail',
-                          extra: {
-                            'name': asset.name,
-                            'balance':
-                                150000.0, // Mock amount since model doesn't have it
-                            'apy': asset.apy,
-                            'icon': asset.icon,
-                            'profit': 1200.0, // Mock profit
-                          },
-                        );
-                      },
-                      child: GlassContainer(
-                        padding: const EdgeInsets.all(16),
-                        borderRadius: BorderRadius.circular(16),
-                        child: Row(
-                          children: [
-                            Container(
-                              width: 50,
-                              height: 50,
-                              decoration: BoxDecoration(
-                                color: Colors.white.withValues(alpha: 0.5),
-                                shape: BoxShape.circle,
-                              ),
-                              alignment: Alignment.center,
-                              child: Text(
-                                asset.icon,
-                                style: const TextStyle(fontSize: 24),
-                              ),
-                            ),
-                            const SizedBox(width: 16),
-                            Expanded(
+              return SafeArea(
+                child: ListView.builder(
+                  padding: const EdgeInsets.all(20),
+                  itemCount: assets.length + 1,
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return FadeInDown(
+                        child: Padding(
+                          padding: const EdgeInsets.only(bottom: 20),
+                          child: GlassContainer(
+                            borderRadius: BorderRadius.circular(20),
+                            child: Padding(
+                              padding: const EdgeInsets.all(20),
                               child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    asset.name,
+                                    'Total Savings',
                                     style: GoogleFonts.montserrat(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
+                                      fontSize: 14,
+                                      color: Colors.grey,
                                     ),
                                   ),
+                                  const SizedBox(height: 8),
                                   Text(
-                                    asset.description,
+                                    '₦ ${totalBalance.toStringAsFixed(2)}',
+                                    style: GoogleFonts.montserrat(
+                                      fontSize: 28,
+                                      fontWeight: FontWeight.bold,
+                                      color: const Color(0xFF29844B),
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  Text(
+                                    '+12.5% APY (Avg)',
                                     style: GoogleFonts.montserrat(
                                       fontSize: 12,
-                                      color: Colors.grey[600],
+                                      color: Colors.green,
+                                      fontWeight: FontWeight.w600,
                                     ),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
                                   ),
                                 ],
                               ),
                             ),
-                            Column(
-                              crossAxisAlignment: CrossAxisAlignment.end,
+                          ),
+                        ),
+                      );
+                    }
+
+                    final asset = assets[index - 1];
+                    // Check if user has this asset
+                    final userAssetIndex = userSavings.indexWhere(
+                      (s) => s.assetId == asset.id,
+                    );
+                    final userAsset = userAssetIndex != -1
+                        ? userSavings[userAssetIndex]
+                        : null;
+
+                    return FadeInUp(
+                      delay: Duration(milliseconds: index * 100),
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 16),
+                        child: GestureDetector(
+                          onTap: () {
+                            context.push(
+                              '/savings/detail',
+                              extra: {'asset': asset, 'userSavings': userAsset},
+                            );
+                          },
+                          child: GlassContainer(
+                            padding: const EdgeInsets.all(16),
+                            borderRadius: BorderRadius.circular(16),
+                            child: Row(
                               children: [
-                                Text(
-                                  '${asset.apy}%',
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF29844B),
+                                Container(
+                                  width: 50,
+                                  height: 50,
+                                  decoration: BoxDecoration(
+                                    color: Colors.white.withValues(alpha: 0.5),
+                                    shape: BoxShape.circle,
+                                  ),
+                                  alignment: Alignment.center,
+                                  child: Text(
+                                    asset.icon,
+                                    style: const TextStyle(fontSize: 24),
                                   ),
                                 ),
-                                Text(
-                                  'APY',
-                                  style: GoogleFonts.montserrat(
-                                    fontSize: 10,
-                                    color: Colors.grey,
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        asset.name,
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 16,
+                                          fontWeight: FontWeight.bold,
+                                        ),
+                                      ),
+                                      Text(
+                                        asset.description,
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 12,
+                                          color: Colors.grey[600],
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      if (userAsset != null)
+                                        Text(
+                                          'Balance: ₦ ${userAsset.balance.toStringAsFixed(2)}',
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 12,
+                                            fontWeight: FontWeight.w600,
+                                            color: const Color(0xFF29844B),
+                                          ),
+                                        ),
+                                    ],
                                   ),
+                                ),
+                                Column(
+                                  crossAxisAlignment: CrossAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      '${asset.apy}%',
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 16,
+                                        fontWeight: FontWeight.bold,
+                                        color: const Color(0xFF29844B),
+                                      ),
+                                    ),
+                                    Text(
+                                      'APY',
+                                      style: GoogleFonts.montserrat(
+                                        fontSize: 10,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
                                 ),
                               ],
                             ),
-                          ],
+                          ),
                         ),
                       ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-        ],
+                    );
+                  },
+                ),
+              );
+            },
+            orElse: () => const SizedBox.shrink(),
+          );
+        },
       ),
-      floatingActionButton: FadeInUp(
-        delay: const Duration(milliseconds: 1000),
-        child: FloatingActionButton.extended(
-          onPressed: () => context.push('/savings/create'),
-          backgroundColor: const Color(0xFF29844B),
-          icon: const Icon(Icons.add, color: Colors.white),
-          label: Text(
-            'New Save',
-            style: GoogleFonts.montserrat(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () {
+          KycGuard.check(
+            context,
+            onVerified: () {
+              context.push('/savings/create');
+            },
+          );
+        },
+        backgroundColor: const Color(0xFF29844B),
+        icon: const Icon(Icons.add, color: Colors.white),
+        label: Text(
+          'New Save',
+          style: GoogleFonts.montserrat(
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
           ),
         ),
       ),

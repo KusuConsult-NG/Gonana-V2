@@ -1,89 +1,226 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
-import '../../domain/entities/product_entity.dart';
-import '../../domain/repositories/market_repository.dart';
 import '../models/product_model.dart';
+import '../models/review_model.dart';
+import '../../domain/repositories/market_repository.dart';
+import '../../domain/entities/product_entity.dart';
+import '../../domain/entities/review_entity.dart';
+import 'dart:io';
 
-@LazySingleton(as: MarketRepository)
-@LazySingleton(as: MarketRepository)
+// @LazySingleton(as: MarketRepository)
 class MarketRepositoryImpl implements MarketRepository {
-  MarketRepositoryImpl();
+  final FirebaseFirestore _firestore;
+  final FirebaseStorage _storage;
+  final FirebaseAuth _auth;
 
-  // Mock Agricultural Data
-  final List<ProductModel> _mockProducts = [
-    const ProductModel(
-      id: 'rice-1',
-      title: 'Premium Parboiled Rice',
-      amount: 45000,
-      imageUrl:
-          'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&q=80',
-      description: 'High quality long grain parboiled rice, 50kg bag.',
-      isHotDeal: true,
-      discountPercentage: 10,
-    ),
-    const ProductModel(
-      id: 'yam-1',
-      title: 'Benue Yams (Large Tubers)',
-      amount: 12000,
-      imageUrl:
-          'https://images.unsplash.com/photo-1593106295287-21a7196395b8?auto=format&fit=crop&q=80',
-      description: 'Fresh large tuber yams from Benue, sold in sets of 5.',
-      isHotDeal: true,
-    ),
-    const ProductModel(
-      id: 'oil-1',
-      title: 'Red Palm Oil (25 Liters)',
-      amount: 28000,
-      imageUrl:
-          'https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&q=80',
-      description: 'Pure unadulterated red palm oil, perfect for cooking.',
-      isHotDeal: false,
-    ),
-    const ProductModel(
-      id: 'beans-1',
-      title: 'Honey Beans (Oloyin)',
-      amount: 15000,
-      imageUrl:
-          'https://images.unsplash.com/photo-1551462147-37885acc36f1?auto=format&fit=crop&q=80',
-      description: 'Clean picked honey beans, 10kg bag.',
-      isHotDeal: false, // Changed to false to test filter
-      discountPercentage: 5, // But has discount
-    ),
-    const ProductModel(
-      id: 'onion-1',
-      title: 'Red Onions (Basket)',
-      amount: 18000,
-      imageUrl:
-          'https://images.unsplash.com/photo-1618512496248-a07fe83aa8cb?auto=format&fit=crop&q=80',
-      description: 'Full basket of fresh red onions.',
-      isHotDeal: true,
-      discountPercentage: 15,
-    ),
-  ];
+  MarketRepositoryImpl(this._firestore, this._storage, this._auth);
 
   @override
-  Future<List<ProductEntity>> getHotDeals() async {
-    // Simulate network delay
-    await Future.delayed(const Duration(milliseconds: 800));
-    return _mockProducts
-        .where(
-          (p) =>
-              p.isHotDeal ||
-              (p.discountPercentage != null && p.discountPercentage! > 0),
-        )
-        .toList();
+  Future<Either<String, List<ProductEntity>>> getHotDeals() async {
+    try {
+      final snapshot = await _firestore.collection('products').limit(5).get();
+      final products = snapshot.docs
+          .map((doc) => ProductModel.fromFirestore(doc))
+          .toList();
+      return Right(products);
+    } catch (e) {
+      return Left('Failed to fetch hot deals: $e');
+    }
   }
 
   @override
-  Future<List<ProductEntity>> getProducts() async {
-    await Future.delayed(const Duration(milliseconds: 800));
-    return _mockProducts;
+  Future<Either<String, List<ProductEntity>>> getProducts() async {
+    try {
+      final snapshot = await _firestore.collection('products').get();
+      final products = snapshot.docs
+          .map((doc) => ProductModel.fromFirestore(doc))
+          .toList();
+      return Right(products);
+    } catch (e) {
+      return Left('Failed to fetch products: $e');
+    }
   }
 
   @override
-  Future<List<ProductEntity>> searchProducts(String query) async {
-    await Future.delayed(const Duration(milliseconds: 500));
-    return _mockProducts
-        .where((p) => p.title.toLowerCase().contains(query.toLowerCase()))
-        .toList();
+  Future<Either<String, List<ProductEntity>>> searchProducts(
+    String query,
+  ) async {
+    try {
+      final snapshot = await _firestore
+          .collection('products')
+          .where('title', isGreaterThanOrEqualTo: query)
+          .where('title', isLessThanOrEqualTo: '$query\uf8ff')
+          .get();
+      final products = snapshot.docs
+          .map((doc) => ProductModel.fromFirestore(doc))
+          .toList();
+      return Right(products);
+    } catch (e) {
+      return Left('Search failed: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, List<ProductEntity>>> getSellerProducts(
+    String sellerId,
+  ) async {
+    try {
+      final snapshot = await _firestore
+          .collection('products')
+          .where('sellerId', isEqualTo: sellerId)
+          .get();
+      final products = snapshot.docs
+          .map((doc) => ProductModel.fromFirestore(doc))
+          .toList();
+      return Right(products);
+    } catch (e) {
+      return Left('Failed to fetch seller products: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, void>> deleteProduct(String productId) async {
+    try {
+      await _firestore.collection('products').doc(productId).delete();
+      return const Right(null);
+    } catch (e) {
+      return Left('Failed to delete product: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, void>> createProduct({
+    required String name,
+    required double price,
+    required String description,
+    required String location,
+    required double availableQuantity,
+    required String unit,
+    double? shippingPrice,
+    List<File> images = const [],
+  }) async {
+    final user = _auth.currentUser;
+    if (user == null) return const Left('User not logged in');
+
+    try {
+      List<String> imageUrls = [];
+      for (var image in images) {
+        final ref = _storage
+            .ref()
+            .child('products')
+            .child(
+              '${DateTime.now().millisecondsSinceEpoch}_${imageUrls.length}.jpg',
+            );
+        await ref.putFile(image);
+        final url = await ref.getDownloadURL();
+        imageUrls.add(url);
+      }
+
+      // Fetch seller profile info
+      final userDoc = await _firestore.collection('users').doc(user.uid).get();
+      final userData = userDoc.data();
+      final sellerName = userData != null
+          ? '${userData['firstName'] ?? ''} ${userData['lastName'] ?? ''}'
+                .trim()
+          : 'Seller';
+      final sellerPhoto = userData?['profilePhoto'] as String?;
+
+      final product = ProductModel(
+        id: '', // Firestore will generate
+        title: name,
+        amount: price,
+        description: description,
+        images: imageUrls,
+        availableQuantity: availableQuantity,
+        unit: unit,
+        quantity: 1, // Default cart quantity
+        location: location,
+        sellerId: user.uid,
+        sellerName: sellerName,
+        sellerPhoto: sellerPhoto,
+        shippingPrice: shippingPrice,
+      );
+
+      await _firestore.collection('products').add(product.toJson());
+      return const Right(null);
+    } catch (e) {
+      return Left('Failed to create product: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, void>> addReview(ReviewEntity review) async {
+    try {
+      final reviewModel = ReviewModel(
+        id: review.id,
+        productId: review.productId,
+        userId: review.userId,
+        userName: review.userName,
+        userPhoto: review.userPhoto,
+        rating: review.rating,
+        comment: review.comment,
+        createdAt: review.createdAt,
+      );
+
+      await _firestore.runTransaction((transaction) async {
+        final productRef = _firestore
+            .collection('products')
+            .doc(review.productId);
+        final reviewRef = productRef.collection('reviews').doc();
+
+        // Get current product state
+        final productSnapshot = await transaction.get(productRef);
+        if (!productSnapshot.exists) {
+          throw Exception('Product does not exist');
+        }
+
+        final productData = productSnapshot.data() as Map<String, dynamic>;
+        final currentRating =
+            (productData['rating'] as num?)?.toDouble() ?? 0.0;
+        final currentCount = (productData['reviewCount'] as num?)?.toInt() ?? 0;
+
+        // Calculate new rating
+        final newCount = currentCount + 1;
+        final newRating =
+            ((currentRating * currentCount) + review.rating) / newCount;
+
+        // Update product
+        transaction.update(productRef, {
+          'rating': newRating,
+          'reviewCount': newCount,
+        });
+
+        // Add review
+        transaction.set(reviewRef, reviewModel.toJson());
+      });
+
+      return const Right(null);
+    } catch (e) {
+      return Left('Failed to add review: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, List<ReviewEntity>>> getProductReviews(
+    String productId,
+  ) async {
+    try {
+      final snapshot = await _firestore
+          .collection('products')
+          .doc(productId)
+          .collection('reviews')
+          .orderBy('createdAt', descending: true)
+          .get();
+
+      final reviews = snapshot.docs
+          .map((doc) => ReviewModel.fromFirestore(doc))
+          .toList();
+      return Right(reviews);
+    } catch (e) {
+      return Left('Failed to fetch reviews: $e');
+    }
   }
 }

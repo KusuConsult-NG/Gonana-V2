@@ -10,6 +10,9 @@ class WalletModel extends WalletEntity {
     required super.balanceNgn,
     required super.cryptoBalanceCcd,
     required super.cryptoBalanceEth,
+    super.virtualAccountNumber,
+    super.bankName,
+    super.cryptoAddresses,
   });
 
   factory WalletModel.fromJson(Map<String, dynamic> json) =>

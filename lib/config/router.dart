@@ -13,8 +13,11 @@ import '../features/settings/presentation/pages/verification_page.dart';
 import '../features/settings/presentation/pages/security_page.dart';
 import '../features/settings/presentation/pages/change_password_page.dart';
 import '../features/settings/presentation/pages/change_pin_page.dart';
+import '../features/auth/presentation/pages/create_pin_page.dart';
 import '../features/wallet/presentation/pages/deposit_page.dart';
 import '../features/wallet/presentation/pages/withdraw_page.dart';
+import '../features/wallet/presentation/pages/transaction_details_page.dart';
+import '../features/wallet/domain/entities/transaction_entity.dart';
 import '../features/savings/presentation/pages/savings_page.dart';
 import '../features/feeds/presentation/pages/create_post_page.dart';
 import '../features/savings/presentation/pages/create_savings_page.dart';
@@ -25,8 +28,17 @@ import '../features/staking/presentation/pages/staking_page.dart';
 import '../features/staking/presentation/pages/stake_amount_page.dart';
 import '../features/savings/presentation/pages/savings_detail_page.dart';
 import '../features/market/presentation/pages/create_product_page.dart';
+import '../features/market/presentation/pages/product_details_page.dart';
+import '../features/market/presentation/pages/my_products_page.dart';
+import '../features/market/domain/entities/product_entity.dart';
+// import '../features/market/data/models/product_model.dart';
 import '../features/market/presentation/pages/cart_page.dart';
+import '../features/market/presentation/pages/my_orders_page.dart';
+import '../features/market/presentation/pages/my_sales_page.dart';
 import '../features/payment/presentation/pages/payment_page.dart';
+import '../features/notifications/presentation/pages/notifications_page.dart';
+import '../features/settings/presentation/pages/notification_settings_page.dart';
+import '../features/market/presentation/pages/product_reviews_page.dart';
 
 final GlobalKey<NavigatorState> _rootNavigatorKey = GlobalKey<NavigatorState>(
   debugLabel: 'root',
@@ -40,7 +52,12 @@ final GoRouter router = GoRouter(
     GoRoute(path: '/login', builder: (context, state) => const LoginPage()),
     GoRoute(
       path: '/enter-pin',
-      builder: (context, state) => const PinEntryPage(),
+      builder: (context, state) {
+        final extra = state.extra as Map<String, dynamic>?;
+        final isTransaction = extra?['isTransaction'] ?? false;
+        final onSuccess = extra?['onSuccess'] as VoidCallback?;
+        return PinEntryPage(isTransaction: isTransaction, onSuccess: onSuccess);
+      },
     ),
     GoRoute(path: '/signup', builder: (context, state) => const SignupPage()),
     GoRoute(
@@ -82,8 +99,23 @@ final GoRouter router = GoRouter(
       builder: (context, state) => const DepositPage(),
     ),
     GoRoute(
+      path: '/wallet/transaction-details',
+      builder: (context, state) {
+        final transaction = state.extra as TransactionEntity;
+        return TransactionDetailsPage(transaction: transaction);
+      },
+    ),
+    GoRoute(
       path: '/wallet/withdraw',
       builder: (context, state) => const WithdrawPage(),
+    ),
+    GoRoute(
+      path: '/notifications',
+      builder: (context, state) => const NotificationsPage(),
+    ),
+    GoRoute(
+      path: '/settings/notifications',
+      builder: (context, state) => const NotificationSettingsPage(),
     ),
     // Settings Routes
     GoRoute(
@@ -104,10 +136,16 @@ final GoRouter router = GoRouter(
         ),
         GoRoute(
           path: 'pin',
+          builder: (context, state) =>
+              const CreatePinPage(), // Renaming this path to generic PIN page or handling logic inside
+        ),
+        GoRoute(
+          path: 'change-pin',
           builder: (context, state) => const ChangePinPage(),
         ),
       ],
     ),
+    // Savings Routes
     GoRoute(
       path: '/savings',
       builder: (context, state) => const SavingsPage(),
@@ -119,12 +157,13 @@ final GoRouter router = GoRouter(
         GoRoute(
           path: 'detail',
           builder: (context, state) {
-            final asset = state.extra as Map<String, dynamic>?;
-            return SavingsDetailPage(asset: asset);
+            final extra = state.extra as Map<String, dynamic>?;
+            return SavingsDetailPage(asset: extra);
           },
         ),
       ],
     ),
+    // Staking Routes
     GoRoute(
       path: '/staking',
       builder: (context, state) => const StakingPage(),
@@ -138,16 +177,50 @@ final GoRouter router = GoRouter(
         ),
       ],
     ),
+    // Market Routes
+    GoRoute(
+      path: '/market',
+      routes: [
+        GoRoute(
+          path: 'create',
+          builder: (context, state) => const CreateProductPage(),
+        ),
+        GoRoute(
+          path: 'my-products',
+          builder: (context, state) => const MyProductsPage(),
+        ),
+        GoRoute(
+          path: 'details',
+          builder: (context, state) {
+            final product = state.extra as ProductEntity;
+            return ProductDetailsPage(product: product);
+          },
+        ),
+        GoRoute(
+          path: 'orders',
+          builder: (context, state) => const MyOrdersPage(),
+        ),
+        GoRoute(
+          path: 'reviews/:id',
+          builder: (context, state) {
+            final id = state.pathParameters['id']!;
+            return ProductReviewsPage(productId: id);
+          },
+        ),
+        GoRoute(
+          path: 'sales',
+          builder: (context, state) => const MySalesPage(),
+        ),
+      ],
+      builder: (context, state) =>
+          const HomePage(), // Or a specific market page if separate
+    ),
     GoRoute(
       path: '/payment',
       builder: (context, state) {
-        final product = state.extra as Map<String, dynamic>?;
+        final product = state.extra as ProductEntity?;
         return PaymentPage(product: product);
       },
-    ),
-    GoRoute(
-      path: '/market/create-product',
-      builder: (context, state) => const CreateProductPage(),
     ),
     GoRoute(path: '/cart', builder: (context, state) => const CartPage()),
   ],

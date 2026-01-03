@@ -21,6 +21,9 @@ PostModel _$PostModelFromJson(Map<String, dynamic> json) => PostModel(
       ? null
       : DateTime.parse(json['createdAt'] as String),
   isLiked: json['isLiked'] as bool? ?? false,
+  likedBy:
+      (json['likedBy'] as List<dynamic>?)?.map((e) => e as String).toList() ??
+      const [],
 );
 
 Map<String, dynamic> _$PostModelToJson(PostModel instance) => <String, dynamic>{
@@ -34,4 +37,5 @@ Map<String, dynamic> _$PostModelToJson(PostModel instance) => <String, dynamic>{
   'ownerPhoto': instance.ownerPhoto,
   'createdAt': instance.createdAt?.toIso8601String(),
   'isLiked': instance.isLiked,
+  'likedBy': instance.likedBy,
 };

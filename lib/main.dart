@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'core/services/notification_service.dart';
 import 'config/injection.dart';
 import 'config/router.dart';
 import 'core/theme/app_theme.dart';
@@ -10,6 +11,23 @@ import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
 import 'features/market/presentation/bloc/cart_bloc.dart';
+import 'features/settings/presentation/bloc/settings_bloc.dart';
+import 'features/settings/presentation/bloc/settings_event.dart';
+import 'features/feeds/presentation/bloc/feed_bloc.dart';
+import 'features/feeds/presentation/bloc/feed_event.dart';
+import 'features/market/presentation/bloc/market_bloc.dart';
+import 'features/chat/presentation/bloc/chat_list_bloc.dart';
+import 'features/chat/presentation/bloc/chat_list_event.dart';
+import 'features/savings/presentation/bloc/savings_bloc.dart';
+import 'features/staking/presentation/bloc/staking_bloc.dart';
+import 'features/savings/presentation/bloc/savings_event.dart';
+import 'features/staking/presentation/bloc/staking_event.dart';
+import 'features/market/presentation/bloc/seller_product_bloc.dart';
+import 'features/market/presentation/bloc/seller_product_event.dart';
+import 'features/settings/presentation/bloc/kyc_bloc.dart';
+import 'features/market/presentation/bloc/order_bloc.dart';
+import 'features/auth/presentation/bloc/auth_bloc.dart';
+import 'features/auth/presentation/bloc/auth_event.dart';
 
 void main() async {
   runZonedGuarded(
@@ -69,6 +87,7 @@ void main() async {
           options: DefaultFirebaseOptions.currentPlatform,
         );
         await configureDependencies();
+        await getIt<NotificationService>().init();
         runApp(const MyApp());
       } catch (e, stackTrace) {
         debugPrint('Startup Error: $e');
@@ -119,8 +138,46 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) => getIt<ThemeCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (context) => getIt<ThemeCubit>()),
+        BlocProvider(
+          create: (context) =>
+              getIt<AuthBloc>()..add(const AuthEvent.started()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              getIt<SettingsBloc>()..add(const SettingsEvent.started()),
+        ),
+        BlocProvider(create: (context) => CartBloc()),
+        BlocProvider(
+          create: (context) =>
+              getIt<FeedBloc>()..add(const FeedEvent.started()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              getIt<MarketBloc>()..add(const MarketEvent.loadData()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              getIt<ChatListBloc>()..add(const ChatListEvent.started()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              getIt<SavingsBloc>()..add(const SavingsEvent.started()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              getIt<StakingBloc>()..add(const StakingEvent.started()),
+        ),
+        BlocProvider(
+          create: (context) =>
+              getIt<SellerProductBloc>()
+                ..add(const SellerProductEvent.loadMyProducts()),
+        ),
+        BlocProvider(create: (context) => getIt<KycBloc>()),
+        BlocProvider(create: (context) => getIt<OrderBloc>()),
+      ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {
           return MaterialApp.router(

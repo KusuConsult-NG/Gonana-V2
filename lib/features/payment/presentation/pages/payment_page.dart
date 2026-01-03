@@ -5,9 +5,17 @@ import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/primary_button.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:uuid/uuid.dart';
+import '../../../auth/presentation/bloc/auth_bloc.dart';
+import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../market/domain/entities/product_entity.dart';
+import '../../../market/domain/entities/order_entity.dart';
+import '../../../market/presentation/bloc/order_bloc.dart';
+import '../../../market/presentation/bloc/order_event.dart';
 
 class PaymentPage extends StatefulWidget {
-  final Map<String, dynamic>? product; // Product details passed from Market
+  final ProductEntity? product; // Product details passed from Market
 
   const PaymentPage({super.key, this.product});
 
@@ -35,13 +43,12 @@ class _PaymentPageState extends State<PaymentPage>
 
   @override
   Widget build(BuildContext context) {
-    final product =
-        widget.product ??
-        {
-          'name': 'Premium Rice',
-          'price': 45000.0,
-          'currency': 'NGN',
-        }; // Fallback mock
+    final product = widget.product;
+    final fallbackProduct = {
+      'name': 'Premium Rice',
+      'price': 45000.0,
+      'currency': 'NGN',
+    };
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -106,7 +113,8 @@ class _PaymentPageState extends State<PaymentPage>
                               ),
                             ),
                             Text(
-                              product['name'],
+                              product?.title ??
+                                  fallbackProduct['name'] as String,
                               style: GoogleFonts.montserrat(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -125,7 +133,7 @@ class _PaymentPageState extends State<PaymentPage>
                               ),
                             ),
                             Text(
-                              '₦ ${(product['price'] as double).toStringAsFixed(2)}',
+                              '₦ ${(product?.amount ?? (fallbackProduct['price'] as double)).toStringAsFixed(2)}',
                               style: GoogleFonts.montserrat(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
@@ -335,8 +343,21 @@ class _PaymentPageState extends State<PaymentPage>
           PrimaryButton(
             text: 'Pay Now',
             onPressed: () {
-              // Redirect to PIN for verification
-              context.push('/enter-pin');
+              _createOrder(context);
+              context.push(
+                '/enter-pin',
+                extra: {
+                  'isTransaction': true,
+                  'onSuccess': () {
+                    // Handle success (pop or navigate to success page)
+                    // For now, let's just pop back to Home or show success
+                    context.go('/home');
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Payment Successful!')),
+                    );
+                  },
+                },
+              );
             },
           ),
         ],
@@ -381,32 +402,30 @@ class _PaymentPageState extends State<PaymentPage>
               padding: const EdgeInsets.all(24),
               child: Column(
                 children: [
-                  ListTile(
-                    leading: const CircleAvatar(
+                  RadioListTile<bool>(
+                    value: true,
+                    // ignore: deprecated_member_use
+                    groupValue: true,
+                    onChanged: (v) {},
+                    secondary: const CircleAvatar(
                       backgroundColor: Colors.orange,
                       child: Text('U', style: TextStyle(color: Colors.white)),
                     ),
                     title: const Text('USDT'),
                     subtitle: const Text('Balance: 5,430.00 USDT'),
-                    trailing: Radio<bool>(
-                      value: true,
-                      groupValue: true,
-                      onChanged: (v) {},
-                    ),
                   ),
                   const Divider(),
-                  ListTile(
-                    leading: const CircleAvatar(
+                  RadioListTile<bool>(
+                    value: false,
+                    // ignore: deprecated_member_use
+                    groupValue: true,
+                    onChanged: (v) {},
+                    secondary: const CircleAvatar(
                       backgroundColor: Colors.purple,
                       child: Text('C', style: TextStyle(color: Colors.white)),
                     ),
                     title: const Text('Concordium'),
                     subtitle: const Text('Balance: 12,000.00 CCD'),
-                    trailing: Radio<bool>(
-                      value: false,
-                      groupValue: true,
-                      onChanged: (v) {},
-                    ),
                   ),
                 ],
               ),
@@ -415,6 +434,7 @@ class _PaymentPageState extends State<PaymentPage>
             PrimaryButton(
               text: 'Confirm Crypto Payment',
               onPressed: () {
+                _createOrder(context);
                 ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(
                     content: Text('Crypto Payment Processing... Success!'),
@@ -461,6 +481,34 @@ class _PaymentPageState extends State<PaymentPage>
         ],
       ),
     );
+  }
+
+  void _createOrder(BuildContext context) {
+    final product = widget.product;
+    if (product == null) return;
+
+    final authState = context.read<AuthBloc>().state;
+    final userId = authState.maybeWhen(
+      authenticated: (auth) => auth.user.id,
+      orElse: () => null,
+    );
+
+    if (userId == null) return;
+
+    final order = OrderEntity(
+      id: const Uuid().v4(),
+      buyerId: userId,
+      sellerId: product.sellerId ?? 'unknown_seller',
+      sellerName: product.sellerName ?? 'Unknown Seller',
+      productName: product.title,
+      productImageUrl: product.imageUrl,
+      totalPrice: product.amount,
+      status: OrderStatus.pending,
+      date: DateTime.now(),
+      logisticsCompany: 'Standard Shipping',
+    );
+
+    context.read<OrderBloc>().add(OrderEvent.createOrder(order));
   }
 }
 

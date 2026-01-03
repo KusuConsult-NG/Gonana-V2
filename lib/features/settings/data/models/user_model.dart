@@ -16,6 +16,9 @@ class UserModel extends UserEntity {
     super.phone,
     super.accountType,
     super.emailActivated,
+    super.kycStatus,
+    super.username,
+    super.pin,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
@@ -35,8 +38,12 @@ class UserModel extends UserEntity {
       phone: entity.phone,
       accountType: entity.accountType,
       emailActivated: entity.emailActivated,
+      kycStatus: entity.kycStatus,
+      username: entity.username,
+      pin: entity.pin,
     );
   }
+  @override
   UserModel copyWith({
     String? id,
     String? email,
@@ -48,6 +55,9 @@ class UserModel extends UserEntity {
     String? phone,
     String? accountType,
     bool? emailActivated,
+    String? kycStatus,
+    String? username,
+    String? pin,
   }) {
     return UserModel(
       id: id ?? this.id,
@@ -60,6 +70,9 @@ class UserModel extends UserEntity {
       phone: phone ?? this.phone,
       accountType: accountType ?? this.accountType,
       emailActivated: emailActivated ?? this.emailActivated,
+      kycStatus: kycStatus ?? this.kycStatus,
+      username: username ?? this.username,
+      pin: pin ?? this.pin,
     );
   }
 }

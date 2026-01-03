@@ -7,6 +7,7 @@ import '../../../../config/injection.dart';
 import '../../../../core/widgets/futuristic_text_field.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/primary_button.dart';
+import '../../../settings/domain/repositories/settings_repository.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -252,17 +253,27 @@ class _LoginPageState extends State<LoginPage> {
                                       },
                                     ),
                                     const SizedBox(height: 16),
-                                    IconButton(
-                                      onPressed: () {
-                                        context.read<AuthBloc>().add(
-                                          const AuthEvent.biometricLoginRequested(),
-                                        );
+                                    FutureBuilder<bool>(
+                                      future: getIt<SettingsRepository>()
+                                          .getBiometricsEnabled(),
+                                      builder: (context, snapshot) {
+                                        if (snapshot.hasData &&
+                                            snapshot.data == true) {
+                                          return IconButton(
+                                            onPressed: () {
+                                              context.read<AuthBloc>().add(
+                                                const AuthEvent.biometricLoginRequested(),
+                                              );
+                                            },
+                                            icon: const Icon(
+                                              Icons.fingerprint,
+                                              size: 40,
+                                              color: Color(0xFF29844B),
+                                            ),
+                                          );
+                                        }
+                                        return const SizedBox.shrink();
                                       },
-                                      icon: const Icon(
-                                        Icons.fingerprint,
-                                        size: 40,
-                                        color: Color(0xFF29844B),
-                                      ),
                                     ),
                                   ],
                                 ),

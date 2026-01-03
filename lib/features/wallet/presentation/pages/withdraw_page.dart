@@ -3,6 +3,13 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../widgets/pin_verification_dialog.dart'; // Import Dialog
+import 'package:flutter_bloc/flutter_bloc.dart';
+// import '../../../auth/presentation/bloc/auth_bloc.dart';
+// import '../../../auth/presentation/bloc/auth_state.dart';
+import '../../../settings/presentation/bloc/settings_bloc.dart';
+import '../../../settings/presentation/bloc/settings_state.dart';
+import '../../../settings/presentation/bloc/settings_event.dart';
 
 class WithdrawPage extends StatefulWidget {
   const WithdrawPage({super.key});
@@ -191,9 +198,103 @@ class _WithdrawPageState extends State<WithdrawPage> {
             return;
           }
 
-          // Simulator logic
-          // Simulator logic
-          context.push('/enter-pin');
+          // PIN Verification Logic
+          final settingsState = context.read<SettingsBloc>().state;
+          final user = settingsState.maybeWhen(
+            loaded: (user) => user,
+            orElse: () => null,
+          );
+
+          if (user == null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Loading user profile... please click confirm again.',
+                ),
+              ),
+            );
+            context.read<SettingsBloc>().add(const SettingsEvent.started());
+            return;
+          }
+
+          // 1. Check if PIN exists
+          if (user.pin == null || user.pin!.isEmpty) {
+            // 2. If no PIN, check KYC
+            if (user.kycStatus != 'verified') {
+              showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('Verification Required'),
+                  content: const Text(
+                    'You must complete KYC verification before you can withdraw funds.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        context.push('/settings/verification');
+                      },
+                      child: const Text('Verify Now'),
+                    ),
+                  ],
+                ),
+              );
+              return;
+            } else {
+              // Verified but no PIN -> Create PIN
+              showDialog(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  title: const Text('PIN Required'),
+                  content: const Text(
+                    'Please create a transaction PIN to proceed.',
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Cancel'),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        context.push('/settings/security/pin');
+                      },
+                      child: const Text('Create PIN'),
+                    ),
+                  ],
+                ),
+              );
+              return;
+            }
+          }
+
+          // 3. PIN matches -> Verify
+          showDialog<bool>(
+            context: context,
+            builder: (context) => PinVerificationDialog(
+              onVerify: (pin) async {
+                // Verify against user.pin
+                // In real app, this should be an API call to avoid local check if possible,
+                // but for now we check against the loaded user entity.
+                await Future.delayed(const Duration(seconds: 1));
+                return pin == user.pin;
+              },
+            ),
+          ).then((verified) {
+            if (verified == true && mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Withdrawal Successful!'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              Navigator.pop(context); // Close Withdraw Page
+            }
+          });
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: AppTheme.primaryColor,

@@ -1,98 +1,78 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:dartz/dartz.dart';
 import 'package:injectable/injectable.dart';
+
 import '../../domain/entities/feed_entity.dart';
+import '../../domain/entities/comment_entity.dart';
 import '../../domain/repositories/feed_repository.dart';
 import '../models/post_model.dart';
 import '../models/story_model.dart';
+import '../models/comment_model.dart';
+import 'dart:io';
 
-@LazySingleton(as: FeedRepository)
+// @LazySingleton(as: FeedRepository)
 class FeedRepositoryImpl implements FeedRepository {
   final FirebaseFirestore _firestore;
+  final FirebaseStorage _storage;
+  final FirebaseAuth _auth;
 
-  FeedRepositoryImpl(this._firestore);
+  FeedRepositoryImpl(this._firestore, this._storage, this._auth);
 
   @override
   Future<Either<String, FeedEntity>> getFeed() async {
-    // Return MOCK DATA directly as per user request to populate feeds
-    await Future.delayed(const Duration(seconds: 1)); // Simulate delay
+    try {
+      final postsSnapshot = await _firestore
+          .collection('posts')
+          .orderBy('createdAt', descending: true)
+          .get();
 
-    final mockStories = [
-      StoryModel(
-        id: '1',
-        ownerName: 'CryptoKing',
-        imageUrl: 'https://i.pravatar.cc/150?u=1',
-        ownerPhoto: 'https://i.pravatar.cc/150?u=1',
-        isViewed: false,
-      ),
-      StoryModel(
-        id: '2',
-        ownerName: 'FarmLead',
-        imageUrl: 'https://i.pravatar.cc/150?u=2',
-        ownerPhoto: 'https://i.pravatar.cc/150?u=2',
-        isViewed: false,
-      ),
-      StoryModel(
-        id: '3',
-        ownerName: 'GonanaOfficial',
-        imageUrl: 'https://i.pravatar.cc/150?u=3',
-        ownerPhoto: 'https://i.pravatar.cc/150?u=3',
-        isViewed: true,
-      ),
-    ];
+      final storiesSnapshot = await _firestore.collection('stories').get();
 
-    final mockPosts = [
-      PostModel(
-        id: '1',
-        ownerId: 'u3',
-        ownerName: 'Gonana Official',
-        ownerPhoto: 'https://i.pravatar.cc/150?u=3',
-        body:
-            'Welcome to the future of agriculture! 🌾 Gonana Enhanced is live. #Gonana #AgriTech',
-        images: [
-          'https://images.unsplash.com/photo-1625246333195-bf3fbc24458d?w=800&q=80',
-        ],
-        createdAt: DateTime.now(),
-        likesCount: 124,
-        commentsCount: 45,
-      ),
-      PostModel(
-        id: '2',
-        ownerId: 'u1',
-        ownerName: 'CryptoKing',
-        ownerPhoto: 'https://i.pravatar.cc/150?u=1',
-        body: 'Just staked my first batch of tokens. The APY looks amazing! 🚀',
-        createdAt: DateTime.now().subtract(const Duration(hours: 2)),
-        likesCount: 89,
-        commentsCount: 12,
-      ),
-      PostModel(
-        id: '3',
-        ownerId: 'u2',
-        ownerName: 'FarmLead',
-        ownerPhoto: 'https://i.pravatar.cc/150?u=2',
-        body:
-            'Harvest season is approaching. Make sure to list your produce early on the market.',
-        images: [
-          'https://images.unsplash.com/photo-1500937386664-56d1dfef3854?w=800&q=80',
-        ],
-        createdAt: DateTime.now().subtract(const Duration(hours: 5)),
-        likesCount: 256,
-        commentsCount: 67,
-      ),
-    ];
+      final userId = _auth.currentUser?.uid;
 
-    return Right(FeedEntity(posts: mockPosts, stories: mockStories));
+      final posts = postsSnapshot.docs.map((doc) {
+        final data = doc.data()..['id'] = doc.id;
+        final likedBy = List<String>.from(data['likedBy'] ?? []);
+        // Manually set isLiked based on current user (PostModel defaults false)
+        final post = PostModel.fromJson(data);
+        return post.copyWith(
+          isLiked: userId != null && likedBy.contains(userId),
+        );
+      }).toList();
+
+      final stories = storiesSnapshot.docs
+          .map((doc) => StoryModel.fromJson(doc.data()..['id'] = doc.id))
+          .toList();
+
+      return Right(FeedEntity(posts: posts, stories: stories));
+    } catch (e) {
+      return Left('Failed to fetch feed: $e');
+    }
   }
 
   @override
-  Future<Either<String, void>> likePost(String postId) async {
+  Future<Either<String, void>> likePost(String postId, String userId) async {
     try {
-      // Optimization: In a real app, use a batch write or transaction
-      // to update user's liked posts subcollection AND the post's like count.
-      await _firestore.collection('posts').doc(postId).update({
-        'likesCount': FieldValue.increment(1),
-      });
+      final postDoc = await _firestore.collection('posts').doc(postId).get();
+      if (!postDoc.exists) return Left('Post not found');
+
+      final data = postDoc.data() as Map<String, dynamic>;
+      final likedBy = List<String>.from(data['likedBy'] ?? []);
+      final isCurrentlyLiked = likedBy.contains(userId);
+
+      if (isCurrentlyLiked) {
+        await _firestore.collection('posts').doc(postId).update({
+          'likedBy': FieldValue.arrayRemove([userId]),
+          'likesCount': FieldValue.increment(-1),
+        });
+      } else {
+        await _firestore.collection('posts').doc(postId).update({
+          'likedBy': FieldValue.arrayUnion([userId]),
+          'likesCount': FieldValue.increment(1),
+        });
+      }
       return const Right(null);
     } catch (e) {
       return Left('Failed to like post: $e');
@@ -103,20 +83,95 @@ class FeedRepositoryImpl implements FeedRepository {
   Future<Either<String, void>> commentOnPost(
     String postId,
     String comment,
+    String userId,
   ) async {
     try {
+      // Fetch user profile for name and photo to add to comment
+      final userDoc = await _firestore.collection('users').doc(userId).get();
+      final userData = userDoc.data();
+
+      final commentData = {
+        'body': comment,
+        'userId': userId,
+        'userName': userData?['firstName'] ?? 'User',
+        'userPhoto': userData?['profilePhoto'],
+        'createdAt': FieldValue.serverTimestamp(),
+      };
+
       await _firestore
           .collection('posts')
           .doc(postId)
           .collection('comments')
-          .add({
-            'body': comment,
-            'createdAt': FieldValue.serverTimestamp(),
-            // 'ownerId': currentUserId... need auth for this.
-          });
+          .add(commentData);
+
+      // Increment comments count on post
+      await _firestore.collection('posts').doc(postId).update({
+        'commentsCount': FieldValue.increment(1),
+      });
+
       return const Right(null);
     } catch (e) {
       return Left('Failed to comment: $e');
     }
+  }
+
+  @override
+  Future<void> createPost({required String caption, File? image}) async {
+    final user = _auth.currentUser;
+    if (user == null) return;
+
+    String? imageUrl;
+
+    if (image != null) {
+      final ref = _storage
+          .ref()
+          .child('posts')
+          .child('${DateTime.now().millisecondsSinceEpoch}.jpg');
+      await ref.putFile(image);
+      imageUrl = await ref.getDownloadURL();
+    }
+
+    // Fetch user profile for name and photo
+    final userDoc = await _firestore.collection('users').doc(user.uid).get();
+    final userData = userDoc.data();
+
+    final newPost = PostModel(
+      id: '',
+      ownerId: user.uid,
+      ownerName: userData?['firstName'] ?? 'User',
+      ownerPhoto: userData?['profilePhoto'],
+      body: caption,
+      images: imageUrl != null ? [imageUrl] : [],
+      createdAt: DateTime.now(),
+      likesCount: 0,
+      commentsCount: 0,
+    );
+
+    await _firestore.collection('posts').add(newPost.toJson());
+  }
+
+  @override
+  Future<Either<String, List<CommentEntity>>> getComments(String postId) async {
+    try {
+      final commentsSnapshot = await _firestore
+          .collection('posts')
+          .doc(postId)
+          .collection('comments')
+          .orderBy('createdAt', descending: false)
+          .get();
+
+      final comments = commentsSnapshot.docs
+          .map((doc) => CommentModel.fromFirestore(doc).toEntity())
+          .toList();
+
+      return Right(comments);
+    } catch (e) {
+      return Left('Failed to fetch comments: $e');
+    }
+  }
+
+  @override
+  Future<Either<String, void>> deletePost(String postId) async {
+    return const Left('Delete not supported in Live mode yet');
   }
 }

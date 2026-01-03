@@ -3,6 +3,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../domain/repositories/market_repository.dart';
 import 'package:injectable/injectable.dart';
+import 'dart:io';
 
 part 'market_event.dart';
 part 'market_state.dart';
@@ -15,35 +16,62 @@ class MarketBloc extends Bloc<MarketEvent, MarketState> {
   MarketBloc(this._marketRepository) : super(const MarketState.initial()) {
     on<_LoadData>(_onLoadData);
     on<_SearchProducts>(_onSearchProducts);
+    on<_CreateProduct>(_onCreateProduct);
   }
 
   Future<void> _onLoadData(_LoadData event, Emitter<MarketState> emit) async {
     emit(const MarketState.loading());
-    try {
-      final hotDeals = await _marketRepository.getHotDeals();
-      final products = await _marketRepository.getProducts();
-      emit(MarketState.loaded(products: products, hotDeals: hotDeals));
-    } catch (e) {
-      emit(MarketState.error(e.toString()));
-    }
+    final hotDealsResult = await _marketRepository.getHotDeals();
+    final productsResult = await _marketRepository.getProducts();
+
+    hotDealsResult.fold((error) => emit(MarketState.error(error)), (hotDeals) {
+      productsResult.fold(
+        (error) => emit(MarketState.error(error)),
+        (products) =>
+            emit(MarketState.loaded(hotDeals: hotDeals, products: products)),
+      );
+    });
   }
 
   Future<void> _onSearchProducts(
     _SearchProducts event,
     Emitter<MarketState> emit,
   ) async {
-    // Keep current data if possible, or show loading overlay
-    // For simplicity, we might just emit loading or a specific search loading state
-    // But let's assume we want to filter the current loaded state or fetch new
-    try {
-      final results = await _marketRepository.searchProducts(event.query);
-      // If we want to maintain the hot deals, we need to know them.
-      // Simplified: Just update the products list with search results
-      final hotDeals = await _marketRepository
-          .getHotDeals(); // Re-fetch or cache
-      emit(MarketState.loaded(products: results, hotDeals: hotDeals));
-    } catch (e) {
-      emit(MarketState.error(e.toString()));
-    }
+    emit(const MarketState.loading());
+    final searchResult = await _marketRepository.searchProducts(event.query);
+    final hotDealsResult = await _marketRepository.getHotDeals();
+
+    searchResult.fold((error) => emit(MarketState.error(error)), (
+      searchResults,
+    ) {
+      hotDealsResult.fold(
+        (error) => emit(MarketState.error(error)),
+        (hotDeals) => emit(
+          MarketState.loaded(hotDeals: hotDeals, products: searchResults),
+        ),
+      );
+    });
+  }
+
+  Future<void> _onCreateProduct(
+    _CreateProduct event,
+    Emitter<MarketState> emit,
+  ) async {
+    emit(const MarketState.loading());
+    final result = await _marketRepository.createProduct(
+      name: event.name,
+      price: event.price,
+      description: event.description,
+      location: event.location,
+      availableQuantity: event.availableQuantity,
+      unit: event.unit,
+      shippingPrice: event.shippingPrice,
+      images: event.images,
+    );
+
+    result.fold(
+      (error) => emit(MarketState.error(error)),
+      (_) => add(const MarketEvent.loadData()),
+    );
   }
 }

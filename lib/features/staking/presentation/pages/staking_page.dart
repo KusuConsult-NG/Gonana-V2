@@ -1,16 +1,21 @@
 import 'package:animate_do/animate_do.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/utils/kyc_guard.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
+import '../../../../core/widgets/scaffold_with_background.dart';
+import '../bloc/staking_bloc.dart';
+import '../bloc/staking_state.dart';
 
 class StakingPage extends StatelessWidget {
   const StakingPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return ScaffoldWithBackground(
       extendBodyBehindAppBar: true,
       appBar: AppBar(
         title: Text(
@@ -34,60 +39,41 @@ class StakingPage extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
       ),
-      body: Stack(
-        children: [
-          // Background
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: Theme.of(context).brightness == Brightness.dark
-                    ? [const Color(0xFF1E1E1E), const Color(0xFF000000)]
-                    : [const Color(0xFFE0F7FA), const Color(0xFFE8F5E9)],
-              ),
-            ),
-          ),
-          SafeArea(
-            child: ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: 3, // Mock Pools
-              itemBuilder: (context, index) {
-                return FadeInUp(
-                  delay: Duration(milliseconds: 100 * index),
-                  child: _buildStakingPoolCard(context, index),
-                );
-              },
-            ),
-          ),
-        ],
+      body: BlocBuilder<StakingBloc, StakingState>(
+        builder: (context, state) {
+          return state.maybeWhen(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (message) => Center(child: Text('Error: $message')),
+            loaded: (pools, userStakes) {
+              return SafeArea(
+                child: pools.isEmpty
+                    ? Center(
+                        child: Text(
+                          'No active staking pools found',
+                          style: GoogleFonts.montserrat(color: Colors.grey),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.all(16),
+                        itemCount: pools.length,
+                        itemBuilder: (context, index) {
+                          final pool = pools[index];
+                          return FadeInUp(
+                            delay: Duration(milliseconds: 100 * index),
+                            child: _buildStakingPoolCard(context, pool),
+                          );
+                        },
+                      ),
+              );
+            },
+            orElse: () => const SizedBox.shrink(),
+          );
+        },
       ),
     );
   }
 
-  Widget _buildStakingPoolCard(BuildContext context, int index) {
-    final pools = [
-      {
-        'name': 'Gona Standard',
-        'apy': '12%',
-        'duration': '30 Days',
-        'min': '5,000',
-      },
-      {
-        'name': 'Gona Gold',
-        'apy': '25%',
-        'duration': '90 Days',
-        'min': '50,000',
-      },
-      {
-        'name': 'Gona Platinum',
-        'apy': '40%',
-        'duration': '180 Days',
-        'min': '200,000',
-      },
-    ];
-    final pool = pools[index];
-
+  Widget _buildStakingPoolCard(BuildContext context, dynamic pool) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: GlassContainer(
@@ -101,7 +87,7 @@ class StakingPage extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Text(
-                    pool['name']!,
+                    pool.name,
                     style: GoogleFonts.montserrat(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -117,7 +103,7 @@ class StakingPage extends StatelessWidget {
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Text(
-                      '${pool['apy']} APY',
+                      '${pool.apy}% APY',
                       style: GoogleFonts.montserrat(
                         color: AppTheme.primaryColor,
                         fontWeight: FontWeight.bold,
@@ -129,19 +115,26 @@ class StakingPage extends StatelessWidget {
               const SizedBox(height: 12),
               Row(
                 children: [
-                  _buildInfoBadge(Icons.timer, pool['duration']!),
+                  _buildInfoBadge(Icons.timer, pool.duration),
                   const SizedBox(width: 12),
-                  _buildInfoBadge(Icons.monetization_on, 'Min: ${pool['min']}'),
+                  _buildInfoBadge(
+                    Icons.monetization_on,
+                    'Min: ${pool.minStakingAmount}',
+                  ),
                 ],
               ),
               const SizedBox(height: 16),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () => context.push(
-                    '/staking/stake',
-                    extra: pool, // Pass pool data
-                  ),
+                  onPressed: () {
+                    KycGuard.check(
+                      context,
+                      onVerified: () {
+                        context.push('/staking/stake', extra: pool);
+                      },
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: AppTheme.primaryColor,
                     shape: RoundedRectangleBorder(

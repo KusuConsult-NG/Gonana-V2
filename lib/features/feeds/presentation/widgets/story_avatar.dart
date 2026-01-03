@@ -59,7 +59,9 @@ class StoryAvatar extends StatelessWidget {
               style: GoogleFonts.montserrat(
                 fontSize: 12,
                 fontWeight: FontWeight.w500,
-                color: Colors.black87,
+                color: Theme.of(context).brightness == Brightness.dark
+                    ? Colors.white
+                    : Colors.black87,
               ),
               overflow: TextOverflow.ellipsis,
               textAlign: TextAlign.center,

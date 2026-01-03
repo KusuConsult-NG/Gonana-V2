@@ -73,7 +73,7 @@ class _EmailVerificationPageState extends State<EmailVerificationPage> {
   }
 
   void _verifyOtp() {
-    String otp = _controllers.map((e) => e.text).join();
+    final String otp = _controllers.map((e) => e.text).join();
     if (otp.length == 4) {
       // Mock Verification
       if (otp == '1234') {

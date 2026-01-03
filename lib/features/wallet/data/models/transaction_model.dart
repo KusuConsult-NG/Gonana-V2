@@ -20,6 +20,9 @@ class TransactionModel extends TransactionEntity {
 
   factory TransactionModel.fromFirestore(DocumentSnapshot doc) {
     final data = doc.data() as Map<String, dynamic>;
+    if (data['date'] is Timestamp) {
+      data['date'] = (data['date'] as Timestamp).toDate().toIso8601String();
+    }
     return TransactionModel.fromJson(data..['id'] = doc.id);
   }
 

@@ -11,6 +11,10 @@ class UserEntity extends Equatable {
   final String? phone;
   final String? accountType;
   final bool? emailActivated;
+  final String? kycStatus; // 'none', 'pending', 'verified'
+
+  final String? username;
+  final String? pin;
 
   const UserEntity({
     this.id,
@@ -23,6 +27,9 @@ class UserEntity extends Equatable {
     this.phone,
     this.accountType,
     this.emailActivated,
+    this.kycStatus,
+    this.username,
+    this.pin,
   });
 
   @override
@@ -37,6 +44,9 @@ class UserEntity extends Equatable {
     phone,
     accountType,
     emailActivated,
+    kycStatus,
+    username,
+    pin,
   ];
   UserEntity copyWith({
     String? id,
@@ -49,6 +59,9 @@ class UserEntity extends Equatable {
     String? phone,
     String? accountType,
     bool? emailActivated,
+    String? kycStatus,
+    String? username,
+    String? pin,
   }) {
     return UserEntity(
       id: id ?? this.id,
@@ -61,6 +74,9 @@ class UserEntity extends Equatable {
       phone: phone ?? this.phone,
       accountType: accountType ?? this.accountType,
       emailActivated: emailActivated ?? this.emailActivated,
+      kycStatus: kycStatus ?? this.kycStatus,
+      username: username ?? this.username,
+      pin: pin ?? this.pin,
     );
   }
 }

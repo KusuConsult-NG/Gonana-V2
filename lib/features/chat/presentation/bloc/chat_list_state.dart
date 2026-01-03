@@ -8,5 +8,6 @@ class ChatListState with _$ChatListState {
   const factory ChatListState.initial() = _Initial;
   const factory ChatListState.loading() = _Loading;
   const factory ChatListState.loaded(List<ChatEntity> chats) = _Loaded;
+  const factory ChatListState.chatCreated(String chatId) = _ChatCreated;
   const factory ChatListState.error(String message) = _Error;
 }

@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../config/injection.dart';
+import 'package:google_fonts/google_fonts.dart';
+import '../../../../core/widgets/scaffold_with_background.dart';
 import '../bloc/chat_list_bloc.dart';
-import '../bloc/chat_list_event.dart';
 import '../bloc/chat_list_state.dart';
 
 class ChatListPage extends StatelessWidget {
@@ -11,57 +11,102 @@ class ChatListPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          getIt<ChatListBloc>()..add(const ChatListEvent.started()),
-      child: Scaffold(
-        appBar: AppBar(title: const Text('Chats')),
-        body: BlocBuilder<ChatListBloc, ChatListState>(
-          builder: (context, state) {
-            return state.maybeWhen(
-              loading: () => const Center(child: CircularProgressIndicator()),
-              error: (message) => Center(child: Text('Error: $message')),
-              loaded: (chats) {
-                if (chats.isEmpty) {
-                  return const Center(child: Text('No active chats'));
-                }
-                return ListView.separated(
-                  itemCount: chats.length,
-                  separatorBuilder: (context, index) =>
-                      const Divider(height: 1),
-                  itemBuilder: (context, index) {
-                    final chat = chats[index];
-                    // Logic to show "Other User" name would typically involve fetching
-                    // that user's profile if not embedded in chat.
-                    // For now, we use the helper or a placeholder.
-                    return ListTile(
-                      leading: const CircleAvatar(child: Icon(Icons.person)),
+    return ScaffoldWithBackground(
+      appBar: AppBar(
+        title: Text(
+          'Messages',
+          style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: BlocBuilder<ChatListBloc, ChatListState>(
+        builder: (context, state) {
+          return state.maybeWhen(
+            loading: () => const Center(child: CircularProgressIndicator()),
+            error: (message) => Center(child: Text('Error: $message')),
+            loaded: (chats) {
+              if (chats.isEmpty) {
+                return Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(
+                        Icons.chat_outlined,
+                        size: 64,
+                        color: Colors.grey[400],
+                      ),
+                      const SizedBox(height: 16),
+                      Text(
+                        'No active chats',
+                        style: GoogleFonts.montserrat(
+                          fontSize: 18,
+                          color: Colors.grey,
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              }
+              return ListView.builder(
+                padding: const EdgeInsets.all(16),
+                itemCount: chats.length,
+                itemBuilder: (context, index) {
+                  final chat = chats[index];
+                  return Card(
+                    elevation: 0,
+                    color: Theme.of(context).cardColor.withValues(alpha: 0.5),
+                    margin: const EdgeInsets.only(bottom: 12),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: ListTile(
+                      contentPadding: const EdgeInsets.all(12),
+                      leading: CircleAvatar(
+                        radius: 28,
+                        backgroundColor: Colors.grey[200],
+                        backgroundImage: chat.otherUserPhoto.isNotEmpty
+                            ? NetworkImage(chat.otherUserPhoto)
+                            : null,
+                        child: chat.otherUserPhoto.isEmpty
+                            ? const Icon(Icons.person, color: Colors.grey)
+                            : null,
+                      ),
                       title: Text(
                         chat.otherUserName.isNotEmpty
                             ? chat.otherUserName
                             : 'User',
-                        style: Theme.of(context).textTheme.titleMedium,
+                        style: GoogleFonts.montserrat(
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                      subtitle: Text(
-                        chat.lastMessage,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
+                      subtitle: Padding(
+                        padding: const EdgeInsets.only(top: 4),
+                        child: Text(
+                          chat.lastMessage,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.montserrat(),
+                        ),
                       ),
                       trailing: Text(
                         _formatTime(chat.lastMessageTime),
-                        style: Theme.of(context).textTheme.bodySmall,
+                        style: GoogleFonts.montserrat(
+                          fontSize: 12,
+                          color: Colors.grey,
+                        ),
                       ),
                       onTap: () {
                         context.push('/chat/${chat.id}');
                       },
-                    );
-                  },
-                );
-              },
-              orElse: () => const SizedBox.shrink(),
-            );
-          },
-        ),
+                    ),
+                  );
+                },
+              );
+            },
+            orElse: () => const SizedBox.shrink(),
+          );
+        },
       ),
     );
   }

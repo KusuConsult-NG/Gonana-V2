@@ -8,4 +8,5 @@ class ChatListEvent with _$ChatListEvent {
   const factory ChatListEvent.started() = _Started;
   const factory ChatListEvent.chatsUpdated(List<ChatEntity> chats) =
       _ChatsUpdated;
+  const factory ChatListEvent.createChat(String otherUserId) = _CreateChat;
 }
