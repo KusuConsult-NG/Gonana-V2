@@ -222,4 +222,19 @@ class MarketRepositoryImpl implements MarketRepository {
       return Left('Failed to fetch reviews: $e');
     }
   }
+
+  @override
+  Future<Either<String, void>> decrementProductStock(
+    String productId,
+    double quantity,
+  ) async {
+    try {
+      await _firestore.collection('products').doc(productId).update({
+        'availableQuantity': FieldValue.increment(-quantity),
+      });
+      return const Right(null);
+    } catch (e) {
+      return Left('Failed to update stock: $e');
+    }
+  }
 }

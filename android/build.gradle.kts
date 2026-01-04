@@ -19,6 +19,27 @@ subprojects {
     project.evaluationDependsOn(":app")
 }
 
+subprojects {
+    project.evaluationDependsOn(":app")
+}
+
+subprojects {
+    plugins.configureEach {
+        if (this.javaClass.name.contains("com.android.build.gradle.LibraryPlugin")) {
+            val android = project.extensions.findByName("android")
+            if (android != null) {
+                try {
+                    val method = android.javaClass.getMethod("setNamespace", String::class.java)
+                    val getMethod = android.javaClass.getMethod("getNamespace")
+                    if (getMethod.invoke(android) == null) {
+                        method.invoke(android, "farm.gonana.${project.name.replace("-", ".")}")
+                    }
+                } catch (e: Exception) { }
+            }
+        }
+    }
+}
+
 tasks.register<Delete>("clean") {
     delete(rootProject.layout.buildDirectory)
 }

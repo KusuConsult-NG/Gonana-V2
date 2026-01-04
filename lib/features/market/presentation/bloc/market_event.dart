@@ -4,6 +4,7 @@ part of 'market_bloc.dart';
 class MarketEvent with _$MarketEvent {
   const factory MarketEvent.loadData() = _LoadData;
   const factory MarketEvent.searchProducts(String query) = _SearchProducts;
+  const factory MarketEvent.filterProducts(String category) = _FilterProducts;
   const factory MarketEvent.createProduct({
     required String name,
     required double price,

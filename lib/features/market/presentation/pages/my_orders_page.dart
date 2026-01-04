@@ -133,7 +133,7 @@ class _OrderCard extends StatelessWidget {
                     width: 60,
                     height: 60,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) =>
+                    errorBuilder: (context, error, stackTrace) =>
                         const Icon(Icons.shopping_bag),
                   ),
                 ),
@@ -222,6 +222,7 @@ class _OrderCard extends StatelessWidget {
   Color _getStatusColor(OrderStatus status) {
     switch (status) {
       case OrderStatus.pending:
+      case OrderStatus.paid: // Treat paid same as pending or similar color
         return Colors.orange;
       case OrderStatus.shipped:
         return Colors.blue;

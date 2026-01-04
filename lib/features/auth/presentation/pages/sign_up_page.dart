@@ -1,3 +1,4 @@
+import 'dart:ui';
 import 'package:animate_do/animate_do.dart';
 import 'package:country_picker/country_picker.dart';
 import 'package:flutter/material.dart';
@@ -6,9 +7,6 @@ import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:intl_phone_number_input/intl_phone_number_input.dart';
 import '../../../../config/injection.dart';
-import '../../../../core/widgets/futuristic_text_field.dart';
-import '../../../../core/widgets/glass_container.dart';
-import '../../../../core/widgets/primary_button.dart';
 import '../bloc/auth_bloc.dart';
 import '../bloc/auth_event.dart';
 import '../bloc/auth_state.dart';
@@ -29,7 +27,6 @@ class _SignupPageState extends State<SignupPage> {
   final _countryController = TextEditingController();
 
   String _phoneNumber = '';
-  // String _isoCode = 'NG'; // Removed unused variable
   bool _isPasswordVisible = false;
 
   @override
@@ -52,9 +49,11 @@ class _SignupPageState extends State<SignupPage> {
             authenticated: (user) {
               context.go('/verify-email/${_emailController.text}');
             },
-            error: (message) => ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text(message), backgroundColor: Colors.red),
-            ),
+            error: (message) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(message), backgroundColor: Colors.red),
+              );
+            },
             orElse: () {},
           );
         },
@@ -67,20 +66,22 @@ class _SignupPageState extends State<SignupPage> {
           return Scaffold(
             body: Stack(
               children: [
-                // Futuristic Background
+                // 1. Premium Background with Gradient
                 Container(
                   decoration: const BoxDecoration(
                     gradient: LinearGradient(
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(0xFFE0F7FA), // Light Cyan
-                        Color(0xFFE8F5E9), // Light Green
-                        Color(0xFFF3E5F5), // Light Purple
+                        Color(0xFF064E3B), // Emerald 900
+                        Color(0xFF065F46), // Emerald 800
+                        Color(0xFF047857), // Emerald 700
                       ],
                     ),
                   ),
                 ),
+
+                // 2. Mesh Gradients / Orbs
                 Positioned(
                   top: -100,
                   left: -100,
@@ -88,11 +89,15 @@ class _SignupPageState extends State<SignupPage> {
                     width: 300,
                     height: 300,
                     decoration: BoxDecoration(
-                      color: Colors.orangeAccent.withValues(alpha: 0.2),
                       shape: BoxShape.circle,
+                      color: const Color(
+                        0xFFF59E0B,
+                      ).withValues(alpha: 0.15), // Amber Accent
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.orangeAccent.withValues(alpha: 0.2),
+                          color: const Color(
+                            0xFFF59E0B,
+                          ).withValues(alpha: 0.15),
                           blurRadius: 100,
                           spreadRadius: 50,
                         ),
@@ -107,11 +112,13 @@ class _SignupPageState extends State<SignupPage> {
                     width: 250,
                     height: 250,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF29844B).withValues(alpha: 0.3),
                       shape: BoxShape.circle,
+                      color: const Color(
+                        0xFF10B981,
+                      ).withValues(alpha: 0.2), // Emerald
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0xFF29844B).withValues(alpha: 0.3),
+                          color: const Color(0xFF10B981).withValues(alpha: 0.2),
                           blurRadius: 100,
                           spreadRadius: 50,
                         ),
@@ -120,7 +127,7 @@ class _SignupPageState extends State<SignupPage> {
                   ),
                 ),
 
-                // Main Content
+                // 3. Glass Content
                 SafeArea(
                   child: Center(
                     child: SingleChildScrollView(
@@ -128,429 +135,22 @@ class _SignupPageState extends State<SignupPage> {
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 20),
                           FadeInDown(
                             duration: const Duration(milliseconds: 800),
-                            child: Hero(
-                              tag: 'logo',
-                              child: Container(
-                                padding: const EdgeInsets.all(16),
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white,
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(
-                                        alpha: 0.1,
-                                      ),
-                                      blurRadius: 20,
-                                      spreadRadius: 5,
-                                    ),
-                                  ],
-                                ),
-                                child: Image.asset(
-                                  'assets/images/logo.png',
-                                  height: 60,
-                                  width: 60,
-                                ),
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 24),
-                          FadeInDown(
-                            delay: const Duration(milliseconds: 200),
-                            duration: const Duration(milliseconds: 800),
-                            child: Text(
-                              'Join Gonana',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.montserrat(
-                                fontSize: 28,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          FadeInDown(
-                            delay: const Duration(milliseconds: 400),
-                            duration: const Duration(milliseconds: 800),
-                            child: Text(
-                              'Start your agricultural journey today.',
-                              textAlign: TextAlign.center,
-                              style: GoogleFonts.montserrat(
-                                color: Colors.black54,
-                                fontSize: 16,
-                              ),
-                            ),
+                            child: _buildHeader(),
                           ),
                           const SizedBox(height: 32),
-
-                          // Glass Form
-                          GlassContainer(
-                            opacity: 0.6,
-                            blur: 15,
-                            child: Form(
-                              key: _formKey,
-                              child: Column(
-                                children: [
-                                  FadeInUp(
-                                    delay: const Duration(milliseconds: 500),
-                                    child: Row(
-                                      children: [
-                                        Expanded(
-                                          child: FuturisticTextField(
-                                            controller: _firstNameController,
-                                            label: 'First Name',
-                                            hint: 'John',
-                                            validator: (v) =>
-                                                v!.isEmpty ? 'Required' : null,
-                                          ),
-                                        ),
-                                        const SizedBox(width: 16),
-                                        Expanded(
-                                          child: FuturisticTextField(
-                                            controller: _lastNameController,
-                                            label: 'Last Name',
-                                            hint: 'Doe',
-                                            validator: (v) =>
-                                                v!.isEmpty ? 'Required' : null,
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Align(
-                                    alignment: Alignment.centerLeft,
-                                    child: Text(
-                                      'Please use your official names as they appear on your Government ID for KYC verification.',
-                                      style: GoogleFonts.montserrat(
-                                        fontSize: 11,
-                                        color: Colors.orangeAccent[700],
-                                        fontStyle: FontStyle.italic,
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  FadeInUp(
-                                    delay: const Duration(milliseconds: 600),
-                                    child: FuturisticTextField(
-                                      controller: _emailController,
-                                      label: 'Email',
-                                      hint: 'john@example.com',
-                                      keyboardType: TextInputType.emailAddress,
-                                      prefixIcon: Icons.email_outlined,
-                                      validator: (v) =>
-                                          v!.isEmpty || !v.contains('@')
-                                          ? 'Valid email required'
-                                          : null,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  FadeInUp(
-                                    delay: const Duration(milliseconds: 700),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 16,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: Colors.white.withValues(
-                                          alpha: 0.7,
-                                        ),
-                                        borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(
-                                          color: Colors.white.withValues(
-                                            alpha: 0.5,
-                                          ),
-                                          width: 1.5,
-                                        ),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black.withValues(
-                                              alpha: 0.05,
-                                            ),
-                                            blurRadius: 10,
-                                            spreadRadius: 2,
-                                          ),
-                                        ],
-                                      ),
-                                      child: InternationalPhoneNumberInput(
-                                        onInputChanged: (PhoneNumber number) {
-                                          _phoneNumber =
-                                              number.phoneNumber ?? '';
-                                        },
-                                        selectorConfig: const SelectorConfig(
-                                          selectorType: PhoneInputSelectorType
-                                              .BOTTOM_SHEET,
-                                          useEmoji: true,
-                                        ),
-                                        ignoreBlank: false,
-                                        autoValidateMode:
-                                            AutovalidateMode.disabled,
-                                        selectorTextStyle:
-                                            GoogleFonts.montserrat(
-                                              color: Colors.black87,
-                                            ),
-                                        textStyle: GoogleFonts.montserrat(
-                                          color: Colors.black87,
-                                        ),
-                                        initialValue: PhoneNumber(
-                                          isoCode: 'NG',
-                                        ),
-                                        formatInput: true,
-                                        inputDecoration: InputDecoration(
-                                          border: InputBorder.none,
-                                          hintText: 'Phone Number',
-                                          hintStyle: GoogleFonts.montserrat(
-                                            color: Colors.grey[400],
-                                          ),
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  FadeInUp(
-                                    delay: const Duration(milliseconds: 800),
-                                    child: InkWell(
-                                      onTap: () {
-                                        showCountryPicker(
-                                          context: context,
-                                          showPhoneCode: false,
-                                          countryListTheme: CountryListThemeData(
-                                            borderRadius: BorderRadius.circular(
-                                              20,
-                                            ),
-                                            inputDecoration: InputDecoration(
-                                              labelText: 'Search',
-                                              hintText:
-                                                  'Start typing to search',
-                                              prefixIcon: const Icon(
-                                                Icons.search,
-                                              ),
-                                              border: OutlineInputBorder(
-                                                borderSide: BorderSide(
-                                                  color: const Color(
-                                                    0xFF8C98A8,
-                                                  ).withValues(alpha: 0.2),
-                                                ),
-                                              ),
-                                            ),
-                                          ),
-                                          onSelect: (Country country) {
-                                            setState(() {
-                                              _countryController.text =
-                                                  country.name;
-                                            });
-                                          },
-                                        );
-                                      },
-                                      child: IgnorePointer(
-                                        child: FuturisticTextField(
-                                          controller: _countryController,
-                                          label: 'Country',
-                                          hint: 'Select Country',
-                                          prefixIcon: Icons.public,
-                                          suffixIcon: const Icon(
-                                            Icons.arrow_drop_down,
-                                          ),
-                                          validator: (v) => v!.isEmpty
-                                              ? 'Country required'
-                                              : null,
-                                        ),
-                                      ),
-                                    ),
-                                  ),
-                                  const SizedBox(height: 16),
-                                  FadeInUp(
-                                    delay: const Duration(milliseconds: 900),
-                                    child: FuturisticTextField(
-                                      controller: _passwordController,
-                                      label: 'Password',
-                                      hint: '******',
-                                      obscureText: !_isPasswordVisible,
-                                      prefixIcon: Icons.lock_outline,
-                                      suffixIcon: IconButton(
-                                        icon: Icon(
-                                          _isPasswordVisible
-                                              ? Icons.visibility
-                                              : Icons.visibility_off,
-                                          color: Colors.grey[600],
-                                        ),
-                                        onPressed: () {
-                                          setState(() {
-                                            _isPasswordVisible =
-                                                !_isPasswordVisible;
-                                          });
-                                        },
-                                      ),
-                                      validator: (v) =>
-                                          v!.length < 6 ? 'Min 6 chars' : null,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 32),
-                                  FadeInUp(
-                                    delay: const Duration(milliseconds: 1000),
-                                    child: PrimaryButton(
-                                      text: 'Sign Up',
-                                      isLoading: isLoading,
-                                      onPressed: () {
-                                        if (_formKey.currentState!.validate()) {
-                                          if (_phoneNumber.isEmpty) {
-                                            ScaffoldMessenger.of(
-                                              context,
-                                            ).showSnackBar(
-                                              const SnackBar(
-                                                content: Text(
-                                                  'Please enter a valid phone number',
-                                                ),
-                                              ),
-                                            );
-                                            return;
-                                          }
-                                          context.read<AuthBloc>().add(
-                                            AuthEvent.signUpRequested(
-                                              firstName:
-                                                  _firstNameController.text,
-                                              lastName:
-                                                  _lastNameController.text,
-                                              email: _emailController.text,
-                                              phoneNumber: _phoneNumber,
-                                              password:
-                                                  _passwordController.text,
-                                              country: _countryController.text,
-                                            ),
-                                          );
-                                        }
-                                      },
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                          const SizedBox(height: 24),
-
-                          // Divider with "OR"
                           FadeInUp(
-                            delay: const Duration(milliseconds: 1100),
-                            child: Row(
-                              children: [
-                                Expanded(
-                                  child: Divider(
-                                    color:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.grey[700]
-                                        : Colors.grey[300],
-                                  ),
-                                ),
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 16,
-                                  ),
-                                  child: Text(
-                                    'OR',
-                                    style: GoogleFonts.montserrat(
-                                      color:
-                                          Theme.of(context).brightness ==
-                                              Brightness.dark
-                                          ? Colors.grey[400]
-                                          : Colors.grey[600],
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                                  ),
-                                ),
-                                Expanded(
-                                  child: Divider(
-                                    color:
-                                        Theme.of(context).brightness ==
-                                            Brightness.dark
-                                        ? Colors.grey[700]
-                                        : Colors.grey[300],
-                                  ),
-                                ),
-                              ],
-                            ),
+                            duration: const Duration(milliseconds: 800),
+                            delay: const Duration(milliseconds: 200),
+                            child: _buildGlassForm(context, isLoading),
                           ),
-
-                          const SizedBox(height: 24),
-
-                          // Google Sign-In Button
-                          FadeInUp(
-                            delay: const Duration(milliseconds: 1200),
-                            child: OutlinedButton.icon(
-                              onPressed: () {
-                                context.read<AuthBloc>().add(
-                                  const AuthEvent.googleSignInRequested(),
-                                );
-                              },
-                              icon: Image.asset(
-                                'assets/images/google_icon.png',
-                                width: 24,
-                                height: 24,
-                                errorBuilder: (_, __, ___) =>
-                                    const Icon(Icons.g_mobiledata, size: 24),
-                              ),
-                              label: Text(
-                                'Continue with Google',
-                                style: GoogleFonts.montserrat(
-                                  fontSize: 15,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                              style: OutlinedButton.styleFrom(
-                                padding: const EdgeInsets.symmetric(
-                                  vertical: 14,
-                                ),
-                                side: BorderSide(
-                                  color:
-                                      Theme.of(context).brightness ==
-                                          Brightness.dark
-                                      ? Colors.grey[700]!
-                                      : Colors.grey[300]!,
-                                  width: 1.5,
-                                ),
-                                foregroundColor:
-                                    Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.white
-                                    : Colors.black87,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                              ),
-                            ),
-                          ),
-
                           const SizedBox(height: 24),
                           FadeInUp(
-                            delay: const Duration(milliseconds: 1300),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Text(
-                                  "Already have an account? ",
-                                  style: GoogleFonts.montserrat(
-                                    color: Colors.black54,
-                                  ),
-                                ),
-                                GestureDetector(
-                                  onTap: () => context.pop(),
-                                  child: Text(
-                                    'Log In',
-                                    style: GoogleFonts.montserrat(
-                                      fontWeight: FontWeight.bold,
-                                      color: const Color(0xFF29844B),
-                                    ),
-                                  ),
-                                ),
-                              ],
-                            ),
+                            duration: const Duration(milliseconds: 800),
+                            delay: const Duration(milliseconds: 400),
+                            child: _buildFooter(),
                           ),
-                          const SizedBox(height: 24),
                         ],
                       ),
                     ),
@@ -561,6 +161,453 @@ class _SignupPageState extends State<SignupPage> {
           );
         },
       ),
+    );
+  }
+
+  Widget _buildHeader() {
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+            border: Border.all(color: Colors.white.withValues(alpha: 0.2)),
+          ),
+          child: Image.asset(
+            'assets/images/logo.png', // Or use icon if logo unavailable
+            height: 48,
+            width: 48,
+            errorBuilder: (_, __, ___) =>
+                const Icon(Icons.spa, size: 48, color: Colors.white),
+          ),
+        ),
+        const SizedBox(height: 24),
+        Text(
+          'Join Gonana',
+          style: GoogleFonts.outfit(
+            fontSize: 32,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          'Start your agricultural journey today.',
+          style: GoogleFonts.inter(
+            fontSize: 16,
+            color: Colors.white.withValues(alpha: 0.7),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildGlassForm(BuildContext context, bool isLoading) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(24),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 10, sigmaY: 10),
+        child: Container(
+          padding: const EdgeInsets.all(24),
+          decoration: BoxDecoration(
+            color: Colors.white.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(24),
+            border: Border.all(
+              color: Colors.white.withValues(alpha: 0.2),
+              width: 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        controller: _firstNameController,
+                        label: 'First Name',
+                        icon: Icons.person_outline,
+                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildTextField(
+                        controller: _lastNameController,
+                        label: 'Last Name',
+                        icon: Icons.person_outline,
+                        validator: (v) => v!.isEmpty ? 'Required' : null,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Please use your official names as on Government ID.',
+                  style: GoogleFonts.inter(
+                    fontSize: 11,
+                    color: const Color(0xFFF59E0B), // Amber
+                    fontStyle: FontStyle.italic,
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  controller: _emailController,
+                  label: 'Email',
+                  icon: Icons.email_outlined,
+                  keyboardType: TextInputType.emailAddress,
+                  validator: (v) => v!.isEmpty || !v.contains('@')
+                      ? 'Valid email required'
+                      : null,
+                ),
+                const SizedBox(height: 16),
+                _buildPhoneInput(),
+                const SizedBox(height: 16),
+                _buildCountryPicker(),
+                const SizedBox(height: 16),
+                _buildTextField(
+                  controller: _passwordController,
+                  label: 'Password',
+                  icon: Icons.lock_outline,
+                  obscureText: !_isPasswordVisible,
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _isPasswordVisible
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                      color: Colors.white70,
+                    ),
+                    onPressed: () => setState(
+                      () => _isPasswordVisible = !_isPasswordVisible,
+                    ),
+                  ),
+                  validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
+                ),
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: isLoading
+                      ? null
+                      : () {
+                          if (_formKey.currentState!.validate()) {
+                            if (_phoneNumber.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Please enter a valid phone number',
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
+                            context.read<AuthBloc>().add(
+                              AuthEvent.signUpRequested(
+                                firstName: _firstNameController.text,
+                                lastName: _lastNameController.text,
+                                email: _emailController.text,
+                                phoneNumber: _phoneNumber,
+                                password: _passwordController.text,
+                                country: _countryController.text,
+                              ),
+                            );
+                          }
+                        },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF047857),
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: isLoading
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : Text(
+                          'Sign Up',
+                          style: GoogleFonts.outfit(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                ),
+                const SizedBox(height: 24),
+                _buildDivider(),
+                const SizedBox(height: 24),
+                _buildSocialButton(context),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    bool obscureText = false,
+    TextInputType? keyboardType,
+    Widget? suffixIcon,
+    String? Function(String?)? validator,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            color: Colors.white70,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 6),
+        TextFormField(
+          controller: controller,
+          obscureText: obscureText,
+          keyboardType: keyboardType,
+          style: GoogleFonts.inter(color: Colors.white),
+          decoration: InputDecoration(
+            filled: true,
+            fillColor: Colors.black.withValues(alpha: 0.2),
+            prefixIcon: Icon(icon, color: Colors.white70, size: 20),
+            suffixIcon: suffixIcon,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide.none,
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: BorderSide(
+                color: Colors.white.withValues(alpha: 0.1),
+              ),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.white, width: 1.5),
+            ),
+            contentPadding: const EdgeInsets.symmetric(
+              horizontal: 12,
+              vertical: 14,
+            ),
+            errorStyle: const TextStyle(color: Color(0xFFFF8080)),
+          ),
+          validator: validator,
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPhoneInput() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Phone Number',
+          style: GoogleFonts.inter(
+            color: Colors.white70,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 2),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          ),
+          child: InternationalPhoneNumberInput(
+            onInputChanged: (PhoneNumber number) {
+              _phoneNumber = number.phoneNumber ?? '';
+            },
+            selectorConfig: const SelectorConfig(
+              selectorType: PhoneInputSelectorType.BOTTOM_SHEET,
+              useEmoji: true,
+            ),
+            ignoreBlank: false,
+            autoValidateMode: AutovalidateMode.disabled,
+            selectorTextStyle: GoogleFonts.inter(color: Colors.white),
+            textStyle: GoogleFonts.inter(color: Colors.white),
+            initialValue: PhoneNumber(isoCode: 'NG'),
+            formatInput: true,
+            inputDecoration: InputDecoration(
+              border: InputBorder.none,
+              hintText: 'Phone Number',
+              hintStyle: GoogleFonts.inter(color: Colors.white38),
+            ),
+            searchBoxDecoration: InputDecoration(
+              labelText: 'Search by Country',
+              labelStyle: GoogleFonts.inter(color: Colors.black54),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCountryPicker() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Country',
+          style: GoogleFonts.inter(
+            color: Colors.white70,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 6),
+        InkWell(
+          onTap: () {
+            showCountryPicker(
+              context: context,
+              showPhoneCode: false,
+              countryListTheme: CountryListThemeData(
+                borderRadius: BorderRadius.circular(20),
+                inputDecoration: InputDecoration(
+                  labelText: 'Search',
+                  hintText: 'Start typing to search',
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
+              onSelect: (Country country) {
+                setState(() {
+                  _countryController.text = country.name;
+                });
+              },
+            );
+          },
+          child: IgnorePointer(
+            child: TextFormField(
+              controller: _countryController,
+              style: GoogleFonts.inter(color: Colors.white),
+              decoration: InputDecoration(
+                filled: true,
+                fillColor: Colors.black.withValues(alpha: 0.2),
+                prefixIcon: const Icon(
+                  Icons.public,
+                  color: Colors.white70,
+                  size: 20,
+                ),
+                suffixIcon: const Icon(
+                  Icons.arrow_drop_down,
+                  color: Colors.white70,
+                ),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Colors.white, width: 1.5),
+                ),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 14,
+                ),
+              ),
+              validator: (v) => v!.isEmpty ? 'Country required' : null,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDivider() {
+    return Row(
+      children: [
+        Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.2))),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          child: Text(
+            'OR',
+            style: GoogleFonts.inter(
+              color: Colors.white60,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        Expanded(child: Divider(color: Colors.white.withValues(alpha: 0.2))),
+      ],
+    );
+  }
+
+  Widget _buildSocialButton(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: () {
+        context.read<AuthBloc>().add(const AuthEvent.googleSignInRequested());
+      },
+      icon: Image.asset(
+        'assets/images/google_icon.png',
+        height: 24,
+        errorBuilder: (_, __, ___) =>
+            const Icon(Icons.g_mobiledata, color: Colors.white),
+      ),
+      label: Text(
+        'Continue with Google',
+        style: GoogleFonts.outfit(
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        side: BorderSide(color: Colors.white.withValues(alpha: 0.3)),
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
+    );
+  }
+
+  Widget _buildFooter() {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        Text(
+          "Already have an account? ",
+          style: GoogleFonts.inter(color: Colors.white70),
+        ),
+        GestureDetector(
+          onTap: () => context.pop(),
+          child: Text(
+            'Log In',
+            style: GoogleFonts.inter(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }

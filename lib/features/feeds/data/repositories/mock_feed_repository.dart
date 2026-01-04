@@ -99,7 +99,7 @@ class MockFeedRepository implements FeedRepository {
     final post = _posts[index];
     final isLiked = post.likedBy.contains(userId);
 
-    final List<String> newLikedBy = List.from(post.likedBy ?? []);
+    final List<String> newLikedBy = List.from(post.likedBy);
     int newLikesCount = post.likesCount;
 
     if (isLiked) {

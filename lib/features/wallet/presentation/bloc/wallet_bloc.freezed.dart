@@ -55,11 +55,12 @@ extension WalletEventPatterns on WalletEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _LoadWalletData value)?  loadWalletData,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _LoadWalletData value)?  loadWalletData,TResult Function( _PayOrder value)?  payOrder,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _LoadWalletData() when loadWalletData != null:
-return loadWalletData(_that);case _:
+return loadWalletData(_that);case _PayOrder() when payOrder != null:
+return payOrder(_that);case _:
   return orElse();
 
 }
@@ -77,11 +78,12 @@ return loadWalletData(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _LoadWalletData value)  loadWalletData,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _LoadWalletData value)  loadWalletData,required TResult Function( _PayOrder value)  payOrder,}){
 final _that = this;
 switch (_that) {
 case _LoadWalletData():
-return loadWalletData(_that);case _:
+return loadWalletData(_that);case _PayOrder():
+return payOrder(_that);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -98,11 +100,12 @@ return loadWalletData(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _LoadWalletData value)?  loadWalletData,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _LoadWalletData value)?  loadWalletData,TResult? Function( _PayOrder value)?  payOrder,}){
 final _that = this;
 switch (_that) {
 case _LoadWalletData() when loadWalletData != null:
-return loadWalletData(_that);case _:
+return loadWalletData(_that);case _PayOrder() when payOrder != null:
+return payOrder(_that);case _:
   return null;
 
 }
@@ -119,10 +122,11 @@ return loadWalletData(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadWalletData,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  loadWalletData,TResult Function( double amount,  String orderId)?  payOrder,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LoadWalletData() when loadWalletData != null:
-return loadWalletData();case _:
+return loadWalletData();case _PayOrder() when payOrder != null:
+return payOrder(_that.amount,_that.orderId);case _:
   return orElse();
 
 }
@@ -140,10 +144,11 @@ return loadWalletData();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadWalletData,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  loadWalletData,required TResult Function( double amount,  String orderId)  payOrder,}) {final _that = this;
 switch (_that) {
 case _LoadWalletData():
-return loadWalletData();case _:
+return loadWalletData();case _PayOrder():
+return payOrder(_that.amount,_that.orderId);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -160,10 +165,11 @@ return loadWalletData();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadWalletData,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  loadWalletData,TResult? Function( double amount,  String orderId)?  payOrder,}) {final _that = this;
 switch (_that) {
 case _LoadWalletData() when loadWalletData != null:
-return loadWalletData();case _:
+return loadWalletData();case _PayOrder() when payOrder != null:
+return payOrder(_that.amount,_that.orderId);case _:
   return null;
 
 }
@@ -202,6 +208,74 @@ String toString() {
 
 
 
+
+/// @nodoc
+
+
+class _PayOrder implements WalletEvent {
+  const _PayOrder({required this.amount, required this.orderId});
+  
+
+ final  double amount;
+ final  String orderId;
+
+/// Create a copy of WalletEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PayOrderCopyWith<_PayOrder> get copyWith => __$PayOrderCopyWithImpl<_PayOrder>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PayOrder&&(identical(other.amount, amount) || other.amount == amount)&&(identical(other.orderId, orderId) || other.orderId == orderId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,amount,orderId);
+
+@override
+String toString() {
+  return 'WalletEvent.payOrder(amount: $amount, orderId: $orderId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PayOrderCopyWith<$Res> implements $WalletEventCopyWith<$Res> {
+  factory _$PayOrderCopyWith(_PayOrder value, $Res Function(_PayOrder) _then) = __$PayOrderCopyWithImpl;
+@useResult
+$Res call({
+ double amount, String orderId
+});
+
+
+
+
+}
+/// @nodoc
+class __$PayOrderCopyWithImpl<$Res>
+    implements _$PayOrderCopyWith<$Res> {
+  __$PayOrderCopyWithImpl(this._self, this._then);
+
+  final _PayOrder _self;
+  final $Res Function(_PayOrder) _then;
+
+/// Create a copy of WalletEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? amount = null,Object? orderId = null,}) {
+  return _then(_PayOrder(
+amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
+as double,orderId: null == orderId ? _self.orderId : orderId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
 
 /// @nodoc
 mixin _$WalletState {

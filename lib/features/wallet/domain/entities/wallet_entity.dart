@@ -25,6 +25,30 @@ class WalletEntity extends Equatable {
     this.kycVerifiedAt,
   });
 
+  WalletEntity copyWith({
+    double? balanceNgn,
+    double? cryptoBalanceCcd,
+    double? cryptoBalanceEth,
+    String? virtualAccountNumber,
+    String? bankName,
+    Map<String, String>? cryptoAddresses,
+    bool? isKycVerified,
+    Map<String, String>? multiChainAddresses,
+    DateTime? kycVerifiedAt,
+  }) {
+    return WalletEntity(
+      balanceNgn: balanceNgn ?? this.balanceNgn,
+      cryptoBalanceCcd: cryptoBalanceCcd ?? this.cryptoBalanceCcd,
+      cryptoBalanceEth: cryptoBalanceEth ?? this.cryptoBalanceEth,
+      virtualAccountNumber: virtualAccountNumber ?? this.virtualAccountNumber,
+      bankName: bankName ?? this.bankName,
+      cryptoAddresses: cryptoAddresses ?? this.cryptoAddresses,
+      isKycVerified: isKycVerified ?? this.isKycVerified,
+      multiChainAddresses: multiChainAddresses ?? this.multiChainAddresses,
+      kycVerifiedAt: kycVerifiedAt ?? this.kycVerifiedAt,
+    );
+  }
+
   @override
   List<Object?> get props => [
     balanceNgn,

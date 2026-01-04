@@ -1,6 +1,6 @@
 import 'package:equatable/equatable.dart';
 
-enum OrderStatus { pending, shipped, delivered, cancelled }
+enum OrderStatus { pending, paid, shipped, delivered, cancelled }
 
 class OrderEntity extends Equatable {
   final String id;

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:qr_flutter/qr_flutter.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/primary_button.dart';
@@ -9,13 +8,18 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
-import '../../../market/domain/entities/product_entity.dart';
+import '../../data/services/payment_service.dart';
 import '../../../market/domain/entities/order_entity.dart';
+import '../../../market/domain/entities/product_entity.dart';
 import '../../../market/presentation/bloc/order_bloc.dart';
 import '../../../market/presentation/bloc/order_event.dart';
+import '../../../wallet/presentation/bloc/wallet_bloc.dart';
+import 'package:get_it/get_it.dart';
+import '../../../market/domain/repositories/market_repository.dart';
+import '../widgets/paystack_webview.dart';
 
 class PaymentPage extends StatefulWidget {
-  final ProductEntity? product; // Product details passed from Market
+  final ProductEntity? product;
 
   const PaymentPage({super.key, this.product});
 
@@ -26,13 +30,16 @@ class PaymentPage extends StatefulWidget {
 class _PaymentPageState extends State<PaymentPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  String _selectedFiatMethod = 'Card'; // Card, Wallet
-  String _selectedCryptoMethod = 'Internal'; // Internal, External
+  final PaymentService _paymentService = PaymentService();
+  String _selectedFiatMethod = 'Card';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
+    _paymentService.initialize();
+    // Load wallet data to ensure balance is up to date
+    context.read<WalletBloc>().add(const WalletEvent.loadWalletData());
   }
 
   @override
@@ -43,6 +50,7 @@ class _PaymentPageState extends State<PaymentPage>
 
   @override
   Widget build(BuildContext context) {
+    // ... (Keep generic UI setup)
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final product = widget.product;
     final fallbackProduct = {
@@ -50,6 +58,7 @@ class _PaymentPageState extends State<PaymentPage>
       'price': 45000.0,
       'currency': 'NGN',
     };
+    final amount = product?.amount ?? (fallbackProduct['price'] as double);
 
     return Scaffold(
       extendBodyBehindAppBar: true,
@@ -75,7 +84,6 @@ class _PaymentPageState extends State<PaymentPage>
       ),
       body: Stack(
         children: [
-          // Background
           Container(
             decoration: BoxDecoration(
               gradient: LinearGradient(
@@ -87,12 +95,10 @@ class _PaymentPageState extends State<PaymentPage>
               ),
             ),
           ),
-
           SafeArea(
             child: Column(
               children: [
                 const SizedBox(height: 16),
-                // Order Summary Card
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
                   child: GlassContainer(
@@ -107,21 +113,16 @@ class _PaymentPageState extends State<PaymentPage>
                             Text(
                               'Product',
                               style: GoogleFonts.inter(
-                                color: isDark
-                                    ? Colors.grey[400]
-                                    : Colors.grey[600],
                                 fontSize: 12,
-                                fontWeight: FontWeight.w500,
+                                color: Colors.grey,
                               ),
                             ),
-                            const SizedBox(height: 4),
                             Text(
                               product?.title ??
                                   fallbackProduct['name'] as String,
                               style: GoogleFonts.inter(
-                                fontWeight: FontWeight.w600,
                                 fontSize: 16,
-                                color: isDark ? Colors.white : Colors.black87,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ],
@@ -132,19 +133,15 @@ class _PaymentPageState extends State<PaymentPage>
                             Text(
                               'Total',
                               style: GoogleFonts.inter(
-                                color: isDark
-                                    ? Colors.grey[400]
-                                    : Colors.grey[600],
                                 fontSize: 12,
-                                fontWeight: FontWeight.w500,
+                                color: Colors.grey,
                               ),
                             ),
-                            const SizedBox(height: 4),
                             Text(
-                              '₦ ${(product?.amount ?? (fallbackProduct['price'] as double)).toStringAsFixed(2)}',
+                              '₦ ${amount.toStringAsFixed(2)}',
                               style: GoogleFonts.inter(
-                                fontWeight: FontWeight.bold,
                                 fontSize: 18,
+                                fontWeight: FontWeight.bold,
                                 color: AppTheme.primaryColor,
                               ),
                             ),
@@ -154,62 +151,8 @@ class _PaymentPageState extends State<PaymentPage>
                     ),
                   ),
                 ),
-
+                // Keep Shipping Method Dropdown if needed, or simplified
                 const SizedBox(height: 16),
-
-                // Shipping Method Selection
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: GlassContainer(
-                    borderRadius: BorderRadius.circular(16),
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 8,
-                    ),
-                    child: DropdownButtonHideUnderline(
-                      child: DropdownButton<String>(
-                        value: 'Logistics Company', // Default
-                        isExpanded: true,
-                        dropdownColor:
-                            Theme.of(context).brightness == Brightness.dark
-                            ? const Color(0xFF2C2C2C)
-                            : Colors.white,
-                        items:
-                            [
-                                  'Logistics Company',
-                                  'Farmer Shipping',
-                                  'Pickup Station',
-                                ]
-                                .map(
-                                  (e) => DropdownMenuItem(
-                                    value: e,
-                                    child: Text(
-                                      e,
-                                      style: GoogleFonts.inter(
-                                        color: isDark
-                                            ? Colors.white
-                                            : Colors.black87,
-                                        fontWeight: FontWeight.w500,
-                                      ),
-                                    ),
-                                  ),
-                                )
-                                .toList(),
-                        onChanged: (val) {},
-                        hint: Text(
-                          'Select Shipping Method',
-                          style: GoogleFonts.inter(
-                            color: isDark ? Colors.grey[400] : Colors.grey[600],
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 24),
-
                 // Tabs
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -227,9 +170,6 @@ class _PaymentPageState extends State<PaymentPage>
                       ),
                       labelColor: Colors.white,
                       unselectedLabelColor: Colors.grey[700],
-                      labelStyle: GoogleFonts.inter(
-                        fontWeight: FontWeight.w600,
-                      ),
                       tabs: const [
                         Tab(text: 'Fiat Payment'),
                         Tab(text: 'Crypto Payment'),
@@ -237,16 +177,13 @@ class _PaymentPageState extends State<PaymentPage>
                     ),
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
-                // Tab Content
                 Expanded(
                   child: TabBarView(
                     controller: _tabController,
                     children: [
-                      _buildFiatTab(context),
-                      _buildCryptoTab(context),
+                      _buildFiatTab(context, amount),
+                      _buildCryptoTab(context, amount),
                     ],
                   ),
                 ),
@@ -258,12 +195,11 @@ class _PaymentPageState extends State<PaymentPage>
     );
   }
 
-  Widget _buildFiatTab(BuildContext context) {
+  Widget _buildFiatTab(BuildContext context, double amount) {
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 24),
       child: Column(
         children: [
-          // Payment Method Selection
           Row(
             children: [
               Expanded(
@@ -286,94 +222,118 @@ class _PaymentPageState extends State<PaymentPage>
             ],
           ),
           const SizedBox(height: 24),
-
-          if (_selectedFiatMethod == 'Card') ...[
+          if (_selectedFiatMethod == 'Card')
             GlassContainer(
               borderRadius: BorderRadius.circular(16),
               padding: const EdgeInsets.all(24),
-              child: const Column(
-                children: [
-                  TextField(
-                    decoration: InputDecoration(
-                      labelText: 'Card Number',
-                      border: OutlineInputBorder(),
-                      prefixIcon: Icon(Icons.credit_card),
-                    ),
-                    keyboardType: TextInputType.number,
-                  ),
-                  SizedBox(height: 16),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            labelText: 'Expiry Date',
-                            hintText: 'MM/YY',
-                            border: OutlineInputBorder(),
-                          ),
-                        ),
-                      ),
-                      SizedBox(width: 16),
-                      Expanded(
-                        child: TextField(
-                          decoration: InputDecoration(
-                            labelText: 'CVV',
-                            border: OutlineInputBorder(),
-                          ),
-                          obscureText: true,
-                          keyboardType: TextInputType.number,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+              child: const Center(
+                child: Text(
+                  'Card details will be handled by Paystack Secure Checkout',
+                ),
               ),
-            ),
-          ] else ...[
+            )
+          else
             GlassContainer(
               borderRadius: BorderRadius.circular(16),
               padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text('Wallet Balance', style: GoogleFonts.montserrat()),
-                      Text(
-                        '₦ 2,500,000.00',
-                        style: GoogleFonts.montserrat(
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryColor,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const Divider(height: 24),
-                  const Text('Sufficient balance for this transaction.'),
-                ],
-              ),
+              child: const Text('Insufficient Wallet Balance (Demo)'),
             ),
-          ],
-
           const SizedBox(height: 32),
           PrimaryButton(
-            text: 'Pay Now',
-            onPressed: () {
-              _createOrder(context);
-              context.push(
-                '/enter-pin',
-                extra: {
-                  'isTransaction': true,
-                  'onSuccess': () {
-                    // Handle success (pop or navigate to success page)
-                    // For now, let's just pop back to Home or show success
-                    context.go('/home');
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Payment Successful!')),
-                    );
-                  },
-                },
+            text: 'Pay with Paystack',
+            onPressed: () async {
+              final authState = context.read<AuthBloc>().state;
+              final email = authState.maybeWhen(
+                authenticated: (auth) => auth.user.email,
+                orElse: () => 'guest@gonana.com',
               );
+
+              final reference = 'ref_${const Uuid().v4()}';
+
+              try {
+                // Initialize Paystack transaction
+                final authUrl = await _paymentService.initializeTransaction(
+                  email: email ?? 'guest@gonana.com',
+                  amount: amount,
+                  reference: reference,
+                );
+
+                if (!context.mounted) return;
+
+                // Open Paystack payment page in webview
+                final result = await Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => PaystackWebView(
+                      authorizationUrl: authUrl,
+                      reference: reference,
+                      onPaymentComplete: (ref) {
+                        Navigator.pop(context, ref);
+                      },
+                      onPaymentCancel: () {
+                        Navigator.pop(context, null);
+                      },
+                    ),
+                  ),
+                );
+
+                if (!context.mounted) return;
+
+                if (result != null) {
+                  // Show verifying message
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Verifying transaction...')),
+                  );
+
+                  // Verify transaction
+                  final isVerified = await _paymentService.verifyTransaction(
+                    reference,
+                  );
+
+                  if (!context.mounted) return;
+
+                  if (isVerified) {
+                    _createOrder(context, status: OrderStatus.paid);
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Payment Verified & Successful!'),
+                        backgroundColor: Colors.green,
+                      ),
+                    );
+                    context.go('/home');
+                  } else {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text('Payment Verification Failed'),
+                        backgroundColor: Colors.red,
+                      ),
+                    );
+                  }
+                } else {
+                  // User cancelled
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Payment cancelled')),
+                  );
+                }
+              } on PaymentFailedException catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('Payment Failed: ${e.message}'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              } catch (e) {
+                if (context.mounted) {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text('An error occurred: $e'),
+                      backgroundColor: Colors.red,
+                    ),
+                  );
+                }
+              }
             },
           ),
         ],
@@ -381,125 +341,80 @@ class _PaymentPageState extends State<PaymentPage>
     );
   }
 
-  Widget _buildCryptoTab(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(horizontal: 24),
-      child: Column(
-        children: [
-          // Payment Method Selection
-          Row(
+  Widget _buildCryptoTab(BuildContext context, double amount) {
+    return BlocConsumer<WalletBloc, WalletState>(
+      listener: (context, state) {
+        // Handle explicit success/error events if we added them,
+        // currently handling via direct UI feedback or just state update
+      },
+      builder: (context, state) {
+        final balance = state.maybeWhen(
+          loaded: (wallet, _) => wallet
+              .balanceNgn, // Showing NGN equivalent for now or mock crypto
+          orElse: () => 0.0,
+        );
+        // For demo, assuming Internal Balance covers it.
+        // Real app would check crypto balance (USDT/CCD).
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: 24),
+          child: Column(
             children: [
-              Expanded(
-                child: _PaymentMethodCard(
-                  title: 'Crypto Wallet',
-                  icon: Icons.token,
-                  isSelected: _selectedCryptoMethod == 'Internal',
-                  onTap: () =>
-                      setState(() => _selectedCryptoMethod = 'Internal'),
+              GlassContainer(
+                borderRadius: BorderRadius.circular(16),
+                padding: const EdgeInsets.all(24),
+                child: Column(
+                  children: [
+                    ListTile(
+                      leading: const CircleAvatar(
+                        backgroundColor: Colors.orange,
+                        child: Text('U', style: TextStyle(color: Colors.white)),
+                      ),
+                      title: const Text('USDT Balance'),
+                      subtitle: Text(
+                        '${(balance / 1500).toStringAsFixed(2)} USDT',
+                      ), // Mock conversion
+                      trailing: const Icon(
+                        Icons.check_circle,
+                        color: Colors.green,
+                      ),
+                    ),
+                    const Divider(),
+                    const Text(
+                      'Order will be paid using your Internal Wallet balance.',
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _PaymentMethodCard(
-                  title: 'External Pay',
-                  icon: Icons.qr_code,
-                  isSelected: _selectedCryptoMethod == 'External',
-                  onTap: () =>
-                      setState(() => _selectedCryptoMethod = 'External'),
-                ),
+              const SizedBox(height: 32),
+              PrimaryButton(
+                text: 'Confirm Crypto Payment',
+                onPressed: () {
+                  context.read<WalletBloc>().add(
+                    WalletEvent.payOrder(
+                      amount: amount,
+                      orderId: const Uuid().v4(),
+                    ),
+                  );
+
+                  _createOrder(context, status: OrderStatus.paid);
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(content: Text('Crypto Payment Successful!')),
+                  );
+                  context.go('/home');
+                },
               ),
             ],
           ),
-          const SizedBox(height: 24),
-
-          if (_selectedCryptoMethod == 'Internal') ...[
-            GlassContainer(
-              borderRadius: BorderRadius.circular(16),
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  RadioListTile<bool>(
-                    value: true,
-                    groupValue: true,
-                    // ignore: deprecated_member_use
-                    onChanged: (v) {},
-                    secondary: const CircleAvatar(
-                      backgroundColor: Colors.orange,
-                      child: Text('U', style: TextStyle(color: Colors.white)),
-                    ),
-                    title: const Text('USDT'),
-                    subtitle: const Text('Balance: 5,430.00 USDT'),
-                  ),
-                  const Divider(),
-                  RadioListTile<bool>(
-                    value: false,
-                    groupValue: true,
-                    // ignore: deprecated_member_use
-                    onChanged: (v) {},
-                    secondary: const CircleAvatar(
-                      backgroundColor: Colors.purple,
-                      child: Text('C', style: TextStyle(color: Colors.white)),
-                    ),
-                    title: const Text('Concordium'),
-                    subtitle: const Text('Balance: 12,000.00 CCD'),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            PrimaryButton(
-              text: 'Confirm Crypto Payment',
-              onPressed: () {
-                _createOrder(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Crypto Payment Processing... Success!'),
-                  ),
-                );
-                context.go('/home');
-              },
-            ),
-          ] else ...[
-            GlassContainer(
-              borderRadius: BorderRadius.circular(16),
-              padding: const EdgeInsets.all(24),
-              child: Column(
-                children: [
-                  const Text('Scan to Pay'),
-                  const SizedBox(height: 16),
-                  QrImageView(
-                    data: '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
-                    version: QrVersions.auto,
-                    size: 200.0,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    '0x71C7656EC7ab88b098defB751B7401B5f6d8976F',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.inconsolata(),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 32),
-            PrimaryButton(
-              text: 'I have made the transfer',
-              onPressed: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Verifying transaction... Confirmed!'),
-                  ),
-                );
-                context.go('/home');
-              },
-            ),
-          ],
-        ],
-      ),
+        );
+      },
     );
   }
 
-  void _createOrder(BuildContext context) {
+  void _createOrder(
+    BuildContext context, {
+    OrderStatus status = OrderStatus.pending,
+  }) {
     final product = widget.product;
     if (product == null) return;
 
@@ -519,12 +434,17 @@ class _PaymentPageState extends State<PaymentPage>
       productName: product.title,
       productImageUrl: product.imageUrl,
       totalPrice: product.amount,
-      status: OrderStatus.pending,
+      status: status,
       date: DateTime.now(),
       logisticsCompany: 'Standard Shipping',
     );
 
     context.read<OrderBloc>().add(OrderEvent.createOrder(order));
+
+    // Decrement stock if order is paid
+    if (status == OrderStatus.paid) {
+      GetIt.I<MarketRepository>().decrementProductStock(product.id, 1);
+    }
   }
 }
 

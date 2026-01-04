@@ -249,50 +249,6 @@ class _FeedsView extends StatelessWidget {
       ),
     );
   }
-
-  void _showCommentDialog(BuildContext context, String postId) {
-    final controller = TextEditingController();
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(
-          'Add Comment',
-          style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
-        ),
-        content: TextField(
-          controller: controller,
-          decoration: const InputDecoration(
-            hintText: 'Write a comment...',
-            border: OutlineInputBorder(),
-          ),
-          maxLines: 3,
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              final authState = context.read<AuthBloc>().state;
-              final userId = authState.maybeWhen(
-                authenticated: (auth) => auth.user.id,
-                orElse: () => null,
-              );
-
-              if (userId != null && controller.text.isNotEmpty) {
-                context.read<FeedBloc>().add(
-                  FeedEvent.postCommented(postId, controller.text, userId),
-                );
-                Navigator.pop(context);
-              }
-            },
-            child: const Text('Post'),
-          ),
-        ],
-      ),
-    );
-  }
 }
 
 // Extension to help with blur property which is not standard in BoxDecoration

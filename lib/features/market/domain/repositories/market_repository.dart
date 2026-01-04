@@ -25,4 +25,8 @@ abstract class MarketRepository {
   Future<Either<String, List<ReviewEntity>>> getProductReviews(
     String productId,
   );
+  Future<Either<String, void>> decrementProductStock(
+    String productId,
+    double quantity,
+  );
 }

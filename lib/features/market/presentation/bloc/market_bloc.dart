@@ -17,6 +17,7 @@ class MarketBloc extends Bloc<MarketEvent, MarketState> {
     on<_LoadData>(_onLoadData);
     on<_SearchProducts>(_onSearchProducts);
     on<_CreateProduct>(_onCreateProduct);
+    on<_FilterProducts>(_onFilterProducts);
   }
 
   Future<void> _onLoadData(_LoadData event, Emitter<MarketState> emit) async {
@@ -29,6 +30,31 @@ class MarketBloc extends Bloc<MarketEvent, MarketState> {
         (error) => emit(MarketState.error(error)),
         (products) =>
             emit(MarketState.loaded(hotDeals: hotDeals, products: products)),
+      );
+    });
+  }
+
+  Future<void> _onFilterProducts(
+    _FilterProducts event,
+    Emitter<MarketState> emit,
+  ) async {
+    emit(const MarketState.loading());
+    // In a real app we might want to cache the full list or query the backend
+    // For now, we fetch fresh data and filter client-side
+    final productsResult = await _marketRepository.getProducts();
+    final hotDealsResult = await _marketRepository.getHotDeals();
+
+    productsResult.fold((error) => emit(MarketState.error(error)), (products) {
+      final filtered = event.category == 'All'
+          ? products
+          : event.category == 'Hot Deals'
+          ? products.where((p) => p.isHotDeal).toList()
+          : products.where((p) => p.category == event.category).toList();
+
+      hotDealsResult.fold(
+        (error) => emit(MarketState.error(error)),
+        (hotDeals) =>
+            emit(MarketState.loaded(hotDeals: hotDeals, products: filtered)),
       );
     });
   }

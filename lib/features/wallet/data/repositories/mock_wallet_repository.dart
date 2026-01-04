@@ -5,6 +5,12 @@ import '../../domain/repositories/wallet_repository.dart';
 // @LazySingleton(as: WalletRepository)
 class MockWalletRepository implements WalletRepository {
   @override
+  Future<void> debitWallet(double amount) async {
+    // Mock debit
+    await Future.delayed(const Duration(milliseconds: 500));
+  }
+
+  @override
   Future<WalletEntity> getWalletBalance() async {
     await Future.delayed(const Duration(milliseconds: 500));
     return const WalletEntity(

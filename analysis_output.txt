@@ -1,0 +1,35 @@
+Analyzing gonana_enhanced...                                    
+
+warning • The declaration '_showKycRequiredDialog' isn't referenced • lib/core/utils/kyc_guard.dart:31:15 • unused_element
+   info • Don't invoke 'print' in production code • lib/core/widgets/scaffold_with_background.dart:21:5 • avoid_print
+   info • Unnecessary use of multiple underscores • lib/features/auth/presentation/pages/sign_in_page.dart:441:37 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/auth/presentation/pages/sign_in_page.dart:441:41 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/auth/presentation/pages/sign_up_page.dart:494:51 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/auth/presentation/pages/sign_up_page.dart:494:55 • unnecessary_underscores
+warning • Dead code • lib/features/feeds/data/repositories/mock_feed_repository.dart:102:60 • dead_code
+warning • The left operand can't be null, so the right operand is never executed • lib/features/feeds/data/repositories/mock_feed_repository.dart:102:63 • dead_null_aware_expression
+warning • The declaration '_showCommentDialog' isn't referenced • lib/features/feeds/presentation/pages/feeds_page.dart:253:8 • unused_element
+   info • Unnecessary use of multiple underscores • lib/features/feeds/presentation/widgets/comment_bottom_sheet.dart:140:43 • unnecessary_underscores
+warning • The declaration '_$ProductModelFromJson' isn't referenced • lib/features/market/data/models/product_model.g.dart:9:14 • unused_element
+warning • The declaration '_$ProductModelToJson' isn't referenced • lib/features/market/data/models/product_model.g.dart:34:22 • unused_element
+   info • Unnecessary use of multiple underscores • lib/features/market/presentation/pages/my_orders_page.dart:136:39 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/market/presentation/pages/my_orders_page.dart:136:43 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/market/presentation/pages/my_sales_page.dart:136:39 • unnecessary_underscores
+   info • Unnecessary use of multiple underscores • lib/features/market/presentation/pages/my_sales_page.dart:136:43 • unnecessary_underscores
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/payment/presentation/pages/payment_page.dart:161:43 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/payment/presentation/pages/payment_page.dart:261:40 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/payment/presentation/pages/payment_page.dart:271:36 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/payment/presentation/pages/payment_page.dart:272:44 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/payment/presentation/pages/payment_page.dart:277:23 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/payment/presentation/pages/payment_page.dart:279:44 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/payment/presentation/pages/payment_page.dart:290:21 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/payment/presentation/pages/payment_page.dart:295:40 • use_build_context_synchronously
+   info • Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check • lib/features/payment/presentation/pages/payment_page.dart:301:40 • use_build_context_synchronously
+   info • 'groupValue' is deprecated and shouldn't be used. Use a RadioGroup ancestor to manage group value instead. This feature was deprecated after v3.32.0-0.0.pre • lib/features/payment/presentation/pages/payment_page.dart:350:25 • deprecated_member_use
+   info • 'onChanged' is deprecated and shouldn't be used. Use RadioGroup to handle value change instead. This feature was deprecated after v3.32.0-0.0.pre • lib/features/payment/presentation/pages/payment_page.dart:351:25 • deprecated_member_use
+   info • 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss • lib/features/payment/presentation/pages/payment_page.dart:446:30 • deprecated_member_use
+   info • 'Share' is deprecated and shouldn't be used. Use SharePlus instead • lib/features/wallet/presentation/pages/transaction_details_page.dart:616:13 • deprecated_member_use
+   info • 'shareXFiles' is deprecated and shouldn't be used. Use SharePlus.instance.share() instead • lib/features/wallet/presentation/pages/transaction_details_page.dart:616:19 • deprecated_member_use
+   info • Don't use 'BuildContext's across async gaps • lib/features/wallet/presentation/pages/transaction_details_page.dart:622:9 • use_build_context_synchronously
+
+31 issues found. (ran in 5.4s)

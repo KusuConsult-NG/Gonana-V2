@@ -47,7 +47,10 @@ class ProductEntity extends Equatable {
     this.shippingPrice,
     this.initialStock,
     this.soldCount,
+    this.category,
   });
+
+  final String? category;
 
   ProductEntity copyWith({
     String? id,
@@ -71,6 +74,7 @@ class ProductEntity extends Equatable {
     double? shippingPrice,
     int? initialStock,
     int? soldCount,
+    String? category,
   }) {
     return ProductEntity(
       id: id ?? this.id,
@@ -94,6 +98,7 @@ class ProductEntity extends Equatable {
       shippingPrice: shippingPrice ?? this.shippingPrice,
       initialStock: initialStock ?? this.initialStock,
       soldCount: soldCount ?? this.soldCount,
+      category: category ?? this.category,
     );
   }
 
@@ -120,5 +125,6 @@ class ProductEntity extends Equatable {
     shippingPrice,
     initialStock,
     soldCount,
+    category,
   ];
 }

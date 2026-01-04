@@ -334,10 +334,12 @@ class _WalletViewState extends State<_WalletView> {
   }
 
   Widget _buildActionButtons() {
-    return Row(
-      children: [
-        Expanded(
-          child: _ActionButton(
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      physics: const BouncingScrollPhysics(),
+      child: Row(
+        children: [
+          _ActionButton(
             icon: Icons.add,
             label: 'Deposit',
             color: AppTheme.primaryColor,
@@ -350,10 +352,8 @@ class _WalletViewState extends State<_WalletView> {
               );
             },
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _ActionButton(
+          const SizedBox(width: 12),
+          _ActionButton(
             icon: Icons.arrow_outward,
             label: 'Withdraw',
             color: Colors.orange,
@@ -366,10 +366,31 @@ class _WalletViewState extends State<_WalletView> {
               );
             },
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _ActionButton(
+          const SizedBox(width: 12),
+          _ActionButton(
+            icon: Icons.swap_horiz_rounded,
+            label: 'Swap',
+            color: Colors.blue,
+            onTap: () {
+              KycGuard.check(
+                context,
+                onVerified: () {
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    SnackBar(
+                      content: Text(
+                        'Swap Feature Coming Soon!',
+                        style: GoogleFonts.inter(),
+                      ),
+                      backgroundColor: Colors.blue,
+                      behavior: SnackBarBehavior.floating,
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+          const SizedBox(width: 12),
+          _ActionButton(
             icon: Icons.savings_outlined,
             label: 'Savings',
             color: Colors.purple,
@@ -382,10 +403,8 @@ class _WalletViewState extends State<_WalletView> {
               );
             },
           ),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: _ActionButton(
+          const SizedBox(width: 12),
+          _ActionButton(
             icon: Icons.monetization_on_outlined,
             label: 'Staking',
             color: Colors.orange,
@@ -398,8 +417,8 @@ class _WalletViewState extends State<_WalletView> {
               );
             },
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -750,6 +769,7 @@ class _ActionButton extends StatelessWidget {
     return InkWell(
       onTap: onTap,
       child: GlassContainer(
+        width: 100, // Fixed width for consistent look in scrollable row
         padding: const EdgeInsets.symmetric(vertical: 16),
         borderRadius: BorderRadius.circular(16),
         opacity: 0.6,

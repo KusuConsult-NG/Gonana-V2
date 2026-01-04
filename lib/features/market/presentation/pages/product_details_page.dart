@@ -560,12 +560,14 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
 
   void _launchEnquiry(BuildContext context) async {
     if (widget.product.sellerId == null) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Seller information not available')),
       );
       return;
     }
 
+    if (!mounted) return;
     showModalBottomSheet(
       context: context,
       backgroundColor: Colors.transparent,

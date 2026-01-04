@@ -38,6 +38,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
 
   Future<void> _pickImages() async {
     if (_selectedImages.length >= 3) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Maximum of 3 images allowed')),
       );
@@ -59,7 +60,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
       images = await _picker.pickMultiImage(limit: remainingSlots);
     }
 
-    if (images.isNotEmpty) {
+    if (images.isNotEmpty && mounted) {
       setState(() {
         _selectedImages.addAll(images.map((e) => File(e.path)));
       });

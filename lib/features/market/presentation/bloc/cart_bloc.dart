@@ -59,9 +59,10 @@ class CartState extends Equatable {
     bool needsLogistics = false;
 
     for (final item in items) {
-      itemTotal += item.amount;
+      final quantity = item.quantity ?? 1;
+      itemTotal += item.amount * quantity;
       if (item.shippingPrice != null) {
-        itemTotal += item.shippingPrice!;
+        itemTotal += item.shippingPrice! * quantity;
       } else {
         needsLogistics = true;
       }
@@ -117,14 +118,25 @@ class CartBloc extends Bloc<CartEvent, CartState> {
         ),
       ) {
     on<AddToCart>((event, emit) {
-      final updatedItems = List<ProductEntity>.from(state.items)
-        ..add(event.product);
-      emit(state.copyWith(items: updatedItems));
+      final items = List<ProductEntity>.from(state.items);
+      final index = items.indexWhere((i) => i.id == event.product.id);
+
+      if (index != -1) {
+        // Increment quantity of existing item
+        final currentQty = items[index].quantity ?? 1;
+        items[index] = items[index].copyWith(quantity: currentQty + 1);
+      } else {
+        // Add new item with quantity 1 if not set
+        items.add(
+          event.product.copyWith(quantity: event.product.quantity ?? 1),
+        );
+      }
+      emit(state.copyWith(items: items));
     });
 
     on<RemoveFromCart>((event, emit) {
       final updatedItems = List<ProductEntity>.from(state.items)
-        ..remove(event.product);
+        ..removeWhere((item) => item.id == event.product.id);
       emit(state.copyWith(items: updatedItems));
     });
 
@@ -137,9 +149,6 @@ class CartBloc extends Bloc<CartEvent, CartState> {
     });
 
     on<UpdateCartItemQuantity>((event, emit) {
-      // Note: This is a simplified implementation
-      // In a real app, ProductEntity would have a quantity field
-      // For now, we'll handle by removing and re-adding the product
       final updatedItems = List<ProductEntity>.from(state.items);
       final index = updatedItems.indexWhere(
         (item) => item.id == event.product.id,
@@ -147,10 +156,10 @@ class CartBloc extends Bloc<CartEvent, CartState> {
 
       if (index != -1) {
         if (event.quantity > 0) {
-          // Keep the product but UI will track quantity separately
-          // This is a limitation of the current ProductEntity structure
+          updatedItems[index] = updatedItems[index].copyWith(
+            quantity: event.quantity,
+          );
         } else {
-          // Remove if quantity is 0
           updatedItems.removeAt(index);
         }
       }

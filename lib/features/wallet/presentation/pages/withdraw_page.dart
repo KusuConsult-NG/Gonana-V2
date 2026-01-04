@@ -25,11 +25,44 @@ class _WithdrawPageState extends State<WithdrawPage>
 
   String selectedBank = 'Access Bank';
   String selectedCrypto = 'USDT (TRC20)';
+  String selectedSpeed = 'Average';
 
-  final double withdrawalFee = 50.0; // NGN or percentage
+  double get withdrawalFee {
+    if (_tabController.index == 0) return 50.0; // Flat fee for Bank
+
+    // Crypto Network Fee based on speed
+    switch (selectedSpeed) {
+      case 'Slow':
+        return 1.0; // e.g. 1 USDT (approx) or equivalent NGN logic
+      case 'Fast':
+        return 5.0;
+      default:
+        return 2.5; // Average
+    }
+  }
+
   double get totalAmount {
     final amount = double.tryParse(_amountController.text) ?? 0.0;
-    return amount > 0 ? amount + withdrawalFee : 0.0;
+    // For crypto, usually fee is deducted or added. Assuming added here.
+    // If amount is NGN, fee should be NGN.
+    // Let's keep it simple: Fee is in NGN for UI consistency as input is NGN.
+
+    double fee = 50.0; // Base bank fee
+    if (_tabController.index == 1) {
+      switch (selectedSpeed) {
+        case 'Slow':
+          fee = 400.0;
+          break;
+        case 'Fast':
+          fee = 1200.0;
+          break;
+        default:
+          fee = 800.0;
+          break;
+      }
+    }
+
+    return amount > 0 ? amount + fee : 0.0;
   }
 
   @override
@@ -291,6 +324,59 @@ class _WithdrawPageState extends State<WithdrawPage>
           FadeInDown(
             delay: const Duration(milliseconds: 300),
             child: _buildAmountField(isDark),
+          ),
+          const SizedBox(height: 24),
+
+          // Network Speed Selector
+          FadeInDown(
+            delay: const Duration(milliseconds: 325),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildSectionTitle(isDark, 'Network Speed (Fee Estimator)'),
+                const SizedBox(height: 12),
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: isDark ? const Color(0xff1f2937) : Colors.grey[200],
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Row(
+                    children: ['Slow', 'Average', 'Fast'].map((speed) {
+                      final isSelected = selectedSpeed == speed;
+                      return Expanded(
+                        child: GestureDetector(
+                          onTap: () => setState(() => selectedSpeed = speed),
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 200),
+                            padding: const EdgeInsets.symmetric(vertical: 10),
+                            decoration: BoxDecoration(
+                              color: isSelected
+                                  ? const Color(0xff22c55e)
+                                  : Colors.transparent,
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                            alignment: Alignment.center,
+                            child: Text(
+                              speed,
+                              style: GoogleFonts.inter(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w600,
+                                color: isSelected
+                                    ? Colors.white
+                                    : (isDark
+                                          ? const Color(0xff9ca3af)
+                                          : const Color(0xff6b7280)),
+                              ),
+                            ),
+                          ),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                ),
+              ],
+            ),
           ),
           const SizedBox(height: 24),
 

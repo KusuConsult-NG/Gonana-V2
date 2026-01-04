@@ -18,9 +18,6 @@ class ScaffoldWithBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    print(
-      'DEBUG: ScaffoldWithBackground building. Brightness: ${Theme.of(context).brightness}',
-    );
     return Scaffold(
       extendBodyBehindAppBar: extendBodyBehindAppBar,
       appBar: appBar,

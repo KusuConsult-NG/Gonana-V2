@@ -133,7 +133,8 @@ class _SaleCard extends StatelessWidget {
                     width: 60,
                     height: 60,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const Icon(Icons.inventory),
+                    errorBuilder: (context, error, stackTrace) =>
+                        const Icon(Icons.inventory),
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -204,6 +205,7 @@ class _SaleCard extends StatelessWidget {
   Color _getStatusColor(OrderStatus status) {
     switch (status) {
       case OrderStatus.pending:
+      case OrderStatus.paid:
         return Colors.orange;
       case OrderStatus.shipped:
         return Colors.blue;

@@ -69,6 +69,9 @@ dependencies:
   carousel_slider: ^5.0.0  # Image carousel for product details
   cached_network_image: ^3.4.1  # Better image caching
   flutter_svg: ^2.0.10+1  # Vector icons and illustrations
+  webview_flutter: ^4.10.0  # For Paystack payment page
+  url_launcher: ^6.3.1  # For opening URLs
+
 
 dev_dependencies:
   flutter_test:
@@ -127,3 +130,7 @@ flutter:
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/to/font-from-package
+
+dependency_overrides:
+  intl: ^0.17.0
+  http: ^1.2.0

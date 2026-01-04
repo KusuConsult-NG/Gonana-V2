@@ -45,16 +45,16 @@ class _FuturisticTextFieldState extends State<FuturisticTextField> {
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
             color: _isFocused
-                ? const Color(0xFF29844B)
+                ? const Color(0xFF29844B).withValues(alpha: 0.5)
                 : Colors.white.withValues(alpha: 0.5),
-            width: 1.5,
+            width: 1.0,
           ),
           boxShadow: [
             if (_isFocused)
               BoxShadow(
-                color: const Color(0xFF29844B).withValues(alpha: 0.3),
+                color: const Color(0xFF29844B).withValues(alpha: 0.2),
                 blurRadius: 12,
-                spreadRadius: 2,
+                spreadRadius: 1,
               ),
           ],
         ),
@@ -63,8 +63,8 @@ class _FuturisticTextFieldState extends State<FuturisticTextField> {
           obscureText: widget.obscureText,
           keyboardType: widget.keyboardType,
           style: GoogleFonts.montserrat(
-            color: Colors.black87,
-            fontWeight: FontWeight.w500,
+            color: Colors.black,
+            fontWeight: FontWeight.w600,
           ),
           validator: widget.validator,
           decoration: InputDecoration(

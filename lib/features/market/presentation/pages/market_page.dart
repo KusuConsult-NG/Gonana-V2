@@ -5,7 +5,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/utils/kyc_guard.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../config/injection.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../bloc/market_bloc.dart';
 import '../bloc/cart_bloc.dart';
@@ -21,16 +20,35 @@ class MarketPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (context) =>
-          getIt<MarketBloc>()..add(const MarketEvent.loadData()),
-      child: const _MarketView(),
-    );
+    // Optimization: MarketBloc is provided by main.dart and already loaded.
+    // We do NOT create a new instance here to avoid double-loading data.
+    return const _MarketView();
   }
 }
 
-class _MarketView extends StatelessWidget {
+class _MarketView extends StatefulWidget {
   const _MarketView();
+
+  @override
+  State<_MarketView> createState() => _MarketViewState();
+}
+
+class _MarketViewState extends State<_MarketView> {
+  String _selectedCategory = 'All';
+  final List<String> _categories = [
+    'All',
+    'Vegetables',
+    'Fruits',
+    'Grains',
+    'Livestock',
+  ];
+
+  void _onCategorySelected(String category) {
+    setState(() {
+      _selectedCategory = category;
+    });
+    context.read<MarketBloc>().add(MarketEvent.filterProducts(category));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -166,7 +184,7 @@ class _MarketView extends StatelessWidget {
                                 const Duration(hours: 6),
                               ),
                               onTap: () {
-                                // TODO: Navigate to flash deals page
+                                _onCategorySelected('Hot Deals');
                               },
                             ),
 
@@ -231,22 +249,23 @@ class _MarketView extends StatelessWidget {
                               delay: const Duration(milliseconds: 700),
                               child: SizedBox(
                                 height: 40,
-                                child: ListView(
+                                child: ListView.separated(
                                   scrollDirection: Axis.horizontal,
-                                  children: [
-                                    const _CategoryChip(
-                                      label: 'All',
-                                      isSelected: true,
-                                    ),
-                                    const SizedBox(width: 8),
-                                    const _CategoryChip(label: 'Vegetables'),
-                                    const SizedBox(width: 8),
-                                    const _CategoryChip(label: 'Fruits'),
-                                    const SizedBox(width: 8),
-                                    const _CategoryChip(label: 'Grains'),
-                                    const SizedBox(width: 8),
-                                    const _CategoryChip(label: 'Livestock'),
-                                  ],
+                                  itemCount: _categories.length,
+                                  separatorBuilder: (context, index) =>
+                                      const SizedBox(width: 8),
+                                  itemBuilder: (context, index) {
+                                    final category = _categories[index];
+                                    return GestureDetector(
+                                      onTap: () =>
+                                          _onCategorySelected(category),
+                                      child: _CategoryChip(
+                                        label: category,
+                                        isSelected:
+                                            _selectedCategory == category,
+                                      ),
+                                    );
+                                  },
                                 ),
                               ),
                             ),

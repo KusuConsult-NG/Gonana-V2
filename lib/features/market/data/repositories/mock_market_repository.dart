@@ -189,4 +189,27 @@ class MockMarketRepository implements MarketRepository {
         ..sort((a, b) => b.createdAt.compareTo(a.createdAt)),
     );
   }
+
+  @override
+  Future<Either<String, void>> decrementProductStock(
+    String productId,
+    double quantity,
+  ) async {
+    try {
+      final index = _mockProducts.indexWhere((p) => p.id == productId);
+      if (index != -1) {
+        final product = _mockProducts[index];
+        final currentStock = product.availableQuantity ?? 0;
+        final newStock = currentStock - quantity;
+
+        _mockProducts[index] = product.copyWith(
+          availableQuantity: newStock < 0 ? 0 : newStock,
+        );
+        return const Right(null);
+      }
+      return const Left('Product not found'); // Or just ignore for mock
+    } catch (e) {
+      return Left('Failed to update mock stock: $e');
+    }
+  }
 }
