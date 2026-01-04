@@ -22,7 +22,7 @@ class _CreateSavingsPageState extends State<CreateSavingsPage> {
       appBar: AppBar(
         title: Text(
           'Create Savings',
-          style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -62,7 +62,7 @@ class _CreateSavingsPageState extends State<CreateSavingsPage> {
                 children: [
                   Text(
                     'How much do you want to save?',
-                    style: GoogleFonts.montserrat(
+                    style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
                     ),
@@ -78,13 +78,13 @@ class _CreateSavingsPageState extends State<CreateSavingsPage> {
                       keyboardType: const TextInputType.numberWithOptions(
                         decimal: true,
                       ),
-                      style: GoogleFonts.montserrat(
+                      style: GoogleFonts.inter(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
                       ),
                       decoration: InputDecoration(
                         prefixText: 'NGN ',
-                        prefixStyle: GoogleFonts.montserrat(
+                        prefixStyle: GoogleFonts.inter(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
                           color: AppTheme.primaryColor,
@@ -101,7 +101,7 @@ class _CreateSavingsPageState extends State<CreateSavingsPage> {
                   // Token Selection (Mock)
                   Text(
                     'Select Token',
-                    style: GoogleFonts.montserrat(
+                    style: GoogleFonts.inter(
                       fontSize: 16,
                       fontWeight: FontWeight.w600,
                     ),
@@ -140,7 +140,7 @@ class _CreateSavingsPageState extends State<CreateSavingsPage> {
                       ),
                       child: Text(
                         'Complete',
-                        style: GoogleFonts.montserrat(
+                        style: GoogleFonts.inter(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
                           color: Colors.white,
@@ -176,7 +176,7 @@ class _CreateSavingsPageState extends State<CreateSavingsPage> {
             const SizedBox(width: 12),
             Text(
               token,
-              style: GoogleFonts.montserrat(
+              style: GoogleFonts.inter(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
               ),

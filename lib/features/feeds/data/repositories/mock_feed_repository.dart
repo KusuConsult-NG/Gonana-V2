@@ -10,7 +10,7 @@ import '../models/comment_model.dart';
 // @LazySingleton(as: FeedRepository)
 @LazySingleton(as: FeedRepository)
 class MockFeedRepository implements FeedRepository {
-  List<PostModel> _posts = [
+  final List<PostModel> _posts = [
     PostModel(
       id: '1',
       ownerId: 'user1',
@@ -94,12 +94,12 @@ class MockFeedRepository implements FeedRepository {
   Future<Either<String, void>> likePost(String postId, String userId) async {
     await Future.delayed(const Duration(milliseconds: 300));
     final index = _posts.indexWhere((p) => p.id == postId);
-    if (index == -1) return Left('Post not found');
+    if (index == -1) return const Left('Post not found');
 
     final post = _posts[index];
     final isLiked = post.likedBy.contains(userId);
 
-    List<String> newLikedBy = List.from(post.likedBy ?? []);
+    final List<String> newLikedBy = List.from(post.likedBy ?? []);
     int newLikesCount = post.likesCount;
 
     if (isLiked) {

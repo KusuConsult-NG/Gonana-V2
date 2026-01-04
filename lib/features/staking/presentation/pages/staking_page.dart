@@ -20,7 +20,7 @@ class StakingPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Staking Pools',
-          style: GoogleFonts.montserrat(
+          style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).brightness == Brightness.dark
                 ? Colors.white
@@ -50,7 +50,7 @@ class StakingPage extends StatelessWidget {
                     ? Center(
                         child: Text(
                           'No active staking pools found',
-                          style: GoogleFonts.montserrat(color: Colors.grey),
+                          style: GoogleFonts.inter(color: Colors.grey),
                         ),
                       )
                     : ListView.builder(
@@ -88,7 +88,7 @@ class StakingPage extends StatelessWidget {
                 children: [
                   Text(
                     pool.name,
-                    style: GoogleFonts.montserrat(
+                    style: GoogleFonts.inter(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
                     ),
@@ -104,7 +104,7 @@ class StakingPage extends StatelessWidget {
                     ),
                     child: Text(
                       '${pool.apy}% APY',
-                      style: GoogleFonts.montserrat(
+                      style: GoogleFonts.inter(
                         color: AppTheme.primaryColor,
                         fontWeight: FontWeight.bold,
                       ),
@@ -144,7 +144,7 @@ class StakingPage extends StatelessWidget {
                   ),
                   child: Text(
                     'Stake Now',
-                    style: GoogleFonts.montserrat(
+                    style: GoogleFonts.inter(
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
                     ),
@@ -163,7 +163,7 @@ class StakingPage extends StatelessWidget {
       children: [
         Icon(icon, size: 16, color: Colors.grey),
         const SizedBox(width: 4),
-        Text(text, style: GoogleFonts.montserrat(color: Colors.grey)),
+        Text(text, style: GoogleFonts.inter(color: Colors.grey)),
       ],
     );
   }

@@ -20,6 +20,8 @@ class ProductEntity extends Equatable {
   final String? unit; // e.g. KG, Ton, Bag
   final double? availableQuantity; // Inventory count
   final double? shippingPrice; // For Farmer Shipping
+  final int? initialStock; // For progress bar
+  final int? soldCount; // For progress bar
 
   String get imageUrl => images.isNotEmpty ? images.first : '';
 
@@ -43,6 +45,8 @@ class ProductEntity extends Equatable {
     this.unit,
     this.availableQuantity,
     this.shippingPrice,
+    this.initialStock,
+    this.soldCount,
   });
 
   ProductEntity copyWith({
@@ -65,6 +69,8 @@ class ProductEntity extends Equatable {
     String? unit,
     double? availableQuantity,
     double? shippingPrice,
+    int? initialStock,
+    int? soldCount,
   }) {
     return ProductEntity(
       id: id ?? this.id,
@@ -86,6 +92,8 @@ class ProductEntity extends Equatable {
       unit: unit ?? this.unit,
       availableQuantity: availableQuantity ?? this.availableQuantity,
       shippingPrice: shippingPrice ?? this.shippingPrice,
+      initialStock: initialStock ?? this.initialStock,
+      soldCount: soldCount ?? this.soldCount,
     );
   }
 
@@ -110,5 +118,7 @@ class ProductEntity extends Equatable {
     unit,
     availableQuantity,
     shippingPrice,
+    initialStock,
+    soldCount,
   ];
 }

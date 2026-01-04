@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class ChatBubble extends StatelessWidget {
   final String text;
@@ -16,6 +17,7 @@ class ChatBubble extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -23,7 +25,9 @@ class ChatBubble extends StatelessWidget {
         margin: const EdgeInsets.symmetric(vertical: 4, horizontal: 8),
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isMe ? AppTheme.primaryColor : Colors.grey[200],
+          color: isMe
+              ? AppTheme.primaryColor
+              : (isDark ? const Color(0xff374151) : Colors.grey[200]),
           borderRadius: BorderRadius.only(
             topLeft: const Radius.circular(16),
             topRight: const Radius.circular(16),
@@ -39,16 +43,23 @@ class ChatBubble extends StatelessWidget {
           children: [
             Text(
               text,
-              style: theme.textTheme.bodyMedium?.copyWith(
-                color: isMe ? Colors.white : Colors.black87,
+              style: GoogleFonts.inter(
+                color: isMe
+                    ? Colors.white
+                    : (isDark ? Colors.white : Colors.black87),
+                fontSize: 14,
+                fontWeight: FontWeight.w400,
               ),
             ),
             const SizedBox(height: 4),
             Text(
               '${timestamp.hour}:${timestamp.minute.toString().padLeft(2, '0')}',
-              style: theme.textTheme.labelSmall?.copyWith(
-                color: isMe ? Colors.white70 : Colors.black54,
+              style: GoogleFonts.inter(
+                color: isMe
+                    ? Colors.white.withValues(alpha: 0.7)
+                    : (isDark ? Colors.grey[400] : Colors.black54),
                 fontSize: 10,
+                fontWeight: FontWeight.w500,
               ),
             ),
           ],

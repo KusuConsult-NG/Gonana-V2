@@ -148,7 +148,7 @@ class _CreateProductPageState extends State<CreateProductPage> {
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
                                   children: [
-                                    Icon(
+                                    const Icon(
                                       Icons.add_photo_alternate_outlined,
                                       size: 32,
                                       color: AppTheme.primaryColor,

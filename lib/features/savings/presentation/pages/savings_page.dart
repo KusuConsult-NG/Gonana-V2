@@ -19,7 +19,7 @@ class SavingsPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           'Savings Assets',
-          style: GoogleFonts.montserrat(
+          style: GoogleFonts.inter(
             color: Theme.of(context).brightness == Brightness.dark
                 ? Colors.white
                 : Colors.black87,
@@ -66,7 +66,7 @@ class SavingsPage extends StatelessWidget {
                                 children: [
                                   Text(
                                     'Total Savings',
-                                    style: GoogleFonts.montserrat(
+                                    style: GoogleFonts.inter(
                                       fontSize: 14,
                                       color: Colors.grey,
                                     ),
@@ -74,7 +74,7 @@ class SavingsPage extends StatelessWidget {
                                   const SizedBox(height: 8),
                                   Text(
                                     '₦ ${totalBalance.toStringAsFixed(2)}',
-                                    style: GoogleFonts.montserrat(
+                                    style: GoogleFonts.inter(
                                       fontSize: 28,
                                       fontWeight: FontWeight.bold,
                                       color: const Color(0xFF29844B),
@@ -83,7 +83,7 @@ class SavingsPage extends StatelessWidget {
                                   const SizedBox(height: 8),
                                   Text(
                                     '+12.5% APY (Avg)',
-                                    style: GoogleFonts.montserrat(
+                                    style: GoogleFonts.inter(
                                       fontSize: 12,
                                       color: Colors.green,
                                       fontWeight: FontWeight.w600,
@@ -143,14 +143,14 @@ class SavingsPage extends StatelessWidget {
                                     children: [
                                       Text(
                                         asset.name,
-                                        style: GoogleFonts.montserrat(
+                                        style: GoogleFonts.inter(
                                           fontSize: 16,
                                           fontWeight: FontWeight.bold,
                                         ),
                                       ),
                                       Text(
                                         asset.description,
-                                        style: GoogleFonts.montserrat(
+                                        style: GoogleFonts.inter(
                                           fontSize: 12,
                                           color: Colors.grey[600],
                                         ),
@@ -160,7 +160,7 @@ class SavingsPage extends StatelessWidget {
                                       if (userAsset != null)
                                         Text(
                                           'Balance: ₦ ${userAsset.balance.toStringAsFixed(2)}',
-                                          style: GoogleFonts.montserrat(
+                                          style: GoogleFonts.inter(
                                             fontSize: 12,
                                             fontWeight: FontWeight.w600,
                                             color: const Color(0xFF29844B),
@@ -174,7 +174,7 @@ class SavingsPage extends StatelessWidget {
                                   children: [
                                     Text(
                                       '${asset.apy}%',
-                                      style: GoogleFonts.montserrat(
+                                      style: GoogleFonts.inter(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         color: const Color(0xFF29844B),
@@ -182,7 +182,7 @@ class SavingsPage extends StatelessWidget {
                                     ),
                                     Text(
                                       'APY',
-                                      style: GoogleFonts.montserrat(
+                                      style: GoogleFonts.inter(
                                         fontSize: 10,
                                         color: Colors.grey,
                                       ),
@@ -216,7 +216,7 @@ class SavingsPage extends StatelessWidget {
         icon: const Icon(Icons.add, color: Colors.white),
         label: Text(
           'New Save',
-          style: GoogleFonts.montserrat(
+          style: GoogleFonts.inter(
             color: Colors.white,
             fontWeight: FontWeight.w600,
           ),

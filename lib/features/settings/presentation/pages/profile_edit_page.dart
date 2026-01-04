@@ -50,8 +50,9 @@ class _ProfileEditPageState extends State<ProfileEditPage> {
   }
 
   void _populateFields(dynamic user) {
-    if (_isDataLoaded)
+    if (_isDataLoaded) {
       return; // Don't verify if already loaded once to preserve edits?
+    }
     // Actually, if we want to allow reset, we can separate logic.
     // For init, we want to set it once.
     if (_fullNameController.text.isEmpty) {

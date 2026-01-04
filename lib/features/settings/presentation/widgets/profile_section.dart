@@ -10,56 +10,87 @@ class ProfileSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(24),
       margin: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        color: isDark ? const Color(0xff1f2937) : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isDark ? const Color(0xff374151) : const Color(0xffe5e7eb),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: isDark ? 0.3 : 0.05),
+            blurRadius: 16,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
+          // Larger Avatar with gradient border
           Container(
-            padding: const EdgeInsets.all(2),
+            padding: const EdgeInsets.all(3),
             decoration: const BoxDecoration(
               shape: BoxShape.circle,
-              color: Color(0xFF29844B), // Gonana Green
+              gradient: LinearGradient(
+                colors: [Color(0xff22c55e), Color(0xff16a34a)],
+              ),
             ),
             child: CircleAvatar(
-              radius: 30,
-              backgroundColor: Colors.white,
+              radius: 40,
+              backgroundColor: isDark ? const Color(0xff1f2937) : Colors.white,
               backgroundImage: user.profilePhoto != null
                   ? NetworkImage(user.profilePhoto!)
                   : null,
               child: user.profilePhoto == null
-                  ? const Icon(Icons.person, color: Color(0xFF29844B))
+                  ? const Icon(Icons.person, color: Color(0xff22c55e), size: 40)
                   : null,
             ),
           ),
-          const SizedBox(width: 16),
+          const SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   '${user.firstName ?? ''} ${user.lastName ?? ''}',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 18,
+                  style: GoogleFonts.inter(
+                    fontSize: 20,
                     fontWeight: FontWeight.w700,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
                 ),
+                const SizedBox(height: 4),
                 Text(
-                  user.accountType ?? 'User',
-                  style: GoogleFonts.montserrat(
-                    fontSize: 14,
-                    color: Colors.grey[600],
+                  user.email ?? '',
+                  style: GoogleFonts.inter(
+                    fontSize: 13,
+                    color: isDark
+                        ? const Color(0xff9ca3af)
+                        : const Color(0xff6b7280),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: const Color(0xff22c55e).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    user.accountType ?? 'User',
+                    style: GoogleFonts.inter(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: const Color(0xff22c55e),
+                    ),
                   ),
                 ),
               ],
@@ -67,7 +98,18 @@ class ProfileSection extends StatelessWidget {
           ),
           IconButton(
             onPressed: onEdit,
-            icon: const Icon(Icons.edit_outlined, color: Color(0xFF29844B)),
+            icon: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: const Color(0xff22c55e).withValues(alpha: 0.1),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.edit_outlined,
+                color: Color(0xff22c55e),
+                size: 20,
+              ),
+            ),
           ),
         ],
       ),

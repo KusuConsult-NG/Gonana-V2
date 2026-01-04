@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/feed_entity.dart';
 import '../../domain/entities/comment_entity.dart';
@@ -56,7 +55,7 @@ class FeedRepositoryImpl implements FeedRepository {
   Future<Either<String, void>> likePost(String postId, String userId) async {
     try {
       final postDoc = await _firestore.collection('posts').doc(postId).get();
-      if (!postDoc.exists) return Left('Post not found');
+      if (!postDoc.exists) return const Left('Post not found');
 
       final data = postDoc.data() as Map<String, dynamic>;
       final likedBy = List<String>.from(data['likedBy'] ?? []);

@@ -13,6 +13,8 @@ import '../../domain/entities/wallet_entity.dart';
 import '../../../../core/widgets/scaffold_with_background.dart';
 import '../../../../core/utils/kyc_guard.dart';
 import '../../../../core/widgets/kyc_banner.dart';
+import '../widgets/multi_chain_address_display.dart';
+import '../../../../core/widgets/kyc_required_card.dart';
 import '../bloc/wallet_bloc.dart';
 
 class WalletPage extends StatelessWidget {
@@ -79,6 +81,13 @@ class _WalletViewState extends State<_WalletView> {
                     children: [
                       const KycBanner(),
                       const SizedBox(height: 8),
+
+                      // Show KYC requirement card if not verified
+                      if (!wallet.isKycVerified) ...[
+                        const KycRequiredCard(),
+                        const SizedBox(height: 16),
+                      ],
+
                       FadeInDown(
                         duration: const Duration(milliseconds: 800),
                         child: _buildBalanceCard(wallet),
@@ -90,86 +99,97 @@ class _WalletViewState extends State<_WalletView> {
                         child: _buildActionButtons(),
                       ),
                       const SizedBox(height: 24),
-                      if (wallet.cryptoAddresses != null &&
-                          wallet.cryptoAddresses!.isNotEmpty) ...[
+
+                      // Show multi-chain addresses if KYC verified
+                      if (wallet.isKycVerified &&
+                          wallet.multiChainAddresses != null &&
+                          wallet.multiChainAddresses!.isNotEmpty) ...[
                         FadeInLeft(
                           delay: const Duration(milliseconds: 300),
-                          child: Text(
-                            'Your Multichain Addresses',
-                            style: GoogleFonts.montserrat(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color:
-                                  Theme.of(context).brightness ==
-                                      Brightness.dark
-                                  ? Colors.white
-                                  : Colors.black87,
-                            ),
+                          child: MultiChainAddressDisplay(
+                            addresses: wallet.multiChainAddresses!,
                           ),
                         ),
-                        const SizedBox(height: 12),
-                        ...wallet.cryptoAddresses!.entries.map((entry) {
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 8.0),
-                            child: GlassContainer(
-                              padding: const EdgeInsets.all(12),
-                              borderRadius: BorderRadius.circular(12),
-                              child: Row(
-                                children: [
-                                  CircleAvatar(
-                                    radius: 14,
-                                    backgroundColor: AppTheme.primaryColor
-                                        .withValues(alpha: 0.2),
-                                    child: const Icon(
-                                      Icons.wallet,
-                                      size: 14,
-                                      color: AppTheme.primaryColor,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 12),
-                                  Expanded(
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Text(
-                                          entry.key,
-                                          style: GoogleFonts.montserrat(
-                                            fontWeight: FontWeight.bold,
-                                            fontSize: 12,
-                                            color: Colors.grey,
-                                          ),
-                                        ),
-                                        Text(
-                                          entry.value,
-                                          style: GoogleFonts.montserrat(
-                                            fontSize: 14,
-                                            fontWeight: FontWeight.w500,
-                                            color:
-                                                Theme.of(context).brightness ==
-                                                    Brightness.dark
-                                                ? Colors.white70
-                                                : Colors.black87,
-                                          ),
-                                          maxLines: 1,
-                                          overflow: TextOverflow.ellipsis,
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  IconButton(
-                                    icon: const Icon(Icons.copy, size: 18),
-                                    onPressed: () {
-                                      // Copy to clipboard logic
-                                    },
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        }),
                         const SizedBox(height: 24),
                       ],
+
+                      // Legacy crypto addresses removed - using multiChainAddresses instead
+                      FadeInLeft(
+                        delay: const Duration(milliseconds: 300),
+                        child: Text(
+                          'Your Multichain Addresses',
+                          style: GoogleFonts.montserrat(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color:
+                                Theme.of(context).brightness == Brightness.dark
+                                ? Colors.white
+                                : Colors.black87,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ...wallet.cryptoAddresses!.entries.map((entry) {
+                        return Padding(
+                          padding: const EdgeInsets.only(bottom: 8.0),
+                          child: GlassContainer(
+                            padding: const EdgeInsets.all(12),
+                            borderRadius: BorderRadius.circular(12),
+                            child: Row(
+                              children: [
+                                CircleAvatar(
+                                  radius: 14,
+                                  backgroundColor: AppTheme.primaryColor
+                                      .withValues(alpha: 0.2),
+                                  child: const Icon(
+                                    Icons.wallet,
+                                    size: 14,
+                                    color: AppTheme.primaryColor,
+                                  ),
+                                ),
+                                const SizedBox(width: 12),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        entry.key,
+                                        style: GoogleFonts.montserrat(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 12,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                      Text(
+                                        entry.value,
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w500,
+                                          color:
+                                              Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? Colors.white70
+                                              : Colors.black87,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.copy, size: 18),
+                                  onPressed: () {
+                                    // Copy to clipboard logic
+                                  },
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      }),
+                      const SizedBox(height: 24),
                       FadeInLeft(
                         delay: const Duration(milliseconds: 400),
                         child: Text(

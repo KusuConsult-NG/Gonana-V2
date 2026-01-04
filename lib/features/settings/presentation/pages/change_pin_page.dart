@@ -52,7 +52,7 @@ class _ChangePinPageState extends State<ChangePinPage> {
         appBar: AppBar(
           title: Text(
             'Change PIN',
-            style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+            style: GoogleFonts.inter(fontWeight: FontWeight.bold),
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -92,7 +92,7 @@ class _ChangePinPageState extends State<ChangePinPage> {
                   children: [
                     Text(
                       'Secure your account',
-                      style: GoogleFonts.montserrat(
+                      style: GoogleFonts.inter(
                         fontSize: 16,
                         color: Colors.grey,
                       ),
@@ -127,7 +127,7 @@ class _ChangePinPageState extends State<ChangePinPage> {
                                   )
                                 : Text(
                                     'Update PIN',
-                                    style: GoogleFonts.montserrat(
+                                    style: GoogleFonts.inter(
                                       fontSize: 16,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.white,
@@ -151,7 +151,7 @@ class _ChangePinPageState extends State<ChangePinPage> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(hint, style: GoogleFonts.montserrat(fontWeight: FontWeight.w600)),
+        Text(hint, style: GoogleFonts.inter(fontWeight: FontWeight.w600)),
         const SizedBox(height: 8),
         GlassContainer(
           padding: EdgeInsets.zero,

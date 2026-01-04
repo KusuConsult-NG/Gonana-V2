@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:injectable/injectable.dart';
 import 'package:local_auth/local_auth.dart';
 import '../../../settings/data/models/user_model.dart';
@@ -139,6 +140,69 @@ class AuthRepositoryImpl implements AuthRepository {
       return Right(AuthEntity(user: userModel, token: token ?? ''));
     } catch (e) {
       return Left(e.toString());
+    }
+  }
+
+  @override
+  Future<Either<String, AuthEntity>> signInWithGoogle() async {
+    try {
+      // Trigger the Google Sign-In flow
+      final GoogleSignIn googleSignIn = GoogleSignIn();
+      final GoogleSignInAccount? googleUser = await googleSignIn.signIn();
+
+      if (googleUser == null) {
+        // User cancelled the sign-in
+        return const Left('Google sign-in cancelled');
+      }
+
+      // Obtain the auth details from the request
+      final GoogleSignInAuthentication googleAuth =
+          await googleUser.authentication;
+
+      // Create a new credential
+      final credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Sign in to Firebase with the Google credential
+      final userCredential = await _firebaseAuth.signInWithCredential(
+        credential,
+      );
+
+      final uid = userCredential.user!.uid;
+
+      // Check if user document exists, if not create it
+      final userDoc = await _firestore.collection('users').doc(uid).get();
+
+      UserModel userModel;
+      if (!userDoc.exists) {
+        // New user - create user document
+        final nameParts = googleUser.displayName?.split(' ') ?? ['', ''];
+        userModel = UserModel(
+          id: uid,
+          email: googleUser.email,
+          firstName: nameParts.isNotEmpty ? nameParts[0] : '',
+          lastName: nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '',
+          profilePhoto: googleUser.photoUrl,
+          accountType: 'User',
+          phone: null,
+          emailActivated: true, // Google emails are verified
+        );
+
+        await _firestore.collection('users').doc(uid).set(userModel.toJson());
+      } else {
+        // Existing user
+        userModel = UserModel.fromJson(userDoc.data()!);
+      }
+
+      final token = await userCredential.user!.getIdToken();
+
+      return Right(AuthEntity(user: userModel, token: token ?? ''));
+    } on FirebaseAuthException catch (e) {
+      return Left(e.message ?? 'Google sign-in failed');
+    } catch (e) {
+      return Left('Google sign-in error: ${e.toString()}');
     }
   }
 

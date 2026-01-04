@@ -2,7 +2,6 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../models/product_model.dart';
 import '../models/review_model.dart';
 import '../../domain/repositories/market_repository.dart';
@@ -106,7 +105,7 @@ class MarketRepositoryImpl implements MarketRepository {
     if (user == null) return const Left('User not logged in');
 
     try {
-      List<String> imageUrls = [];
+      final List<String> imageUrls = [];
       for (var image in images) {
         final ref = _storage
             .ref()

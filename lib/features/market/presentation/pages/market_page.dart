@@ -7,12 +7,12 @@ import '../../../../core/utils/kyc_guard.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../config/injection.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/widgets/glass_container.dart';
 import '../bloc/market_bloc.dart';
 import '../bloc/cart_bloc.dart';
 import '../widgets/hot_deal_card.dart';
 import '../widgets/product_card.dart';
 import '../widgets/currency_converter_widget.dart';
+import '../widgets/flash_deal_banner.dart';
 import '../../../../core/widgets/scaffold_with_background.dart';
 import '../../../../core/widgets/kyc_banner.dart';
 
@@ -159,26 +159,44 @@ class _MarketView extends StatelessWidget {
                           children: [
                             const KycBanner(),
                             const SizedBox(height: 8),
-                            // Search Bar in Glass
+
+                            // Flash Deal Banner
+                            FlashDealBanner(
+                              endTime: DateTime.now().add(
+                                const Duration(hours: 6),
+                              ),
+                              onTap: () {
+                                // TODO: Navigate to flash deals page
+                              },
+                            ),
+
+                            const SizedBox(height: 16),
+                            // Search Bar
                             FadeInDown(
                               duration: const Duration(milliseconds: 600),
-                              child: GlassContainer(
-                                opacity: 0.5,
-                                blur: 10,
-                                padding: EdgeInsets.zero,
-                                borderRadius: BorderRadius.circular(12),
-                                color:
-                                    Theme.of(context).brightness ==
-                                        Brightness.dark
-                                    ? Colors.black
-                                    : Colors.white,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  color:
+                                      Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? const Color(0xff1f2937)
+                                      : Colors.white,
+                                  borderRadius: BorderRadius.circular(12),
+                                  border: Border.all(
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? const Color(0xff374151)
+                                        : const Color(0xffe5e7eb),
+                                  ),
+                                ),
                                 child: TextField(
                                   onChanged: (value) {
                                     context.read<MarketBloc>().add(
                                       MarketEvent.searchProducts(value),
                                     );
                                   },
-                                  style: GoogleFonts.outfit(
+                                  style: GoogleFonts.inter(
                                     color:
                                         Theme.of(context).brightness ==
                                             Brightness.dark
@@ -187,20 +205,16 @@ class _MarketView extends StatelessWidget {
                                   ),
                                   decoration: InputDecoration(
                                     hintText: 'Search products...',
-                                    hintStyle: GoogleFonts.montserrat(
+                                    hintStyle: GoogleFonts.inter(
                                       color:
                                           Theme.of(context).brightness ==
                                               Brightness.dark
-                                          ? Colors.grey[400]
-                                          : Colors.grey,
+                                          ? const Color(0xff9ca3af)
+                                          : const Color(0xff6b7280),
                                     ),
-                                    prefixIcon: Icon(
+                                    prefixIcon: const Icon(
                                       Icons.search,
-                                      color:
-                                          Theme.of(context).brightness ==
-                                              Brightness.dark
-                                          ? Colors.grey[400]
-                                          : Colors.grey,
+                                      color: Color(0xff22c55e),
                                     ),
                                     border: InputBorder.none,
                                     contentPadding: const EdgeInsets.symmetric(
@@ -208,6 +222,31 @@ class _MarketView extends StatelessWidget {
                                       vertical: 14,
                                     ),
                                   ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 16),
+                            // Category filters
+                            FadeInDown(
+                              delay: const Duration(milliseconds: 700),
+                              child: SizedBox(
+                                height: 40,
+                                child: ListView(
+                                  scrollDirection: Axis.horizontal,
+                                  children: [
+                                    const _CategoryChip(
+                                      label: 'All',
+                                      isSelected: true,
+                                    ),
+                                    const SizedBox(width: 8),
+                                    const _CategoryChip(label: 'Vegetables'),
+                                    const SizedBox(width: 8),
+                                    const _CategoryChip(label: 'Fruits'),
+                                    const SizedBox(width: 8),
+                                    const _CategoryChip(label: 'Grains'),
+                                    const SizedBox(width: 8),
+                                    const _CategoryChip(label: 'Livestock'),
+                                  ],
                                 ),
                               ),
                             ),
@@ -334,6 +373,43 @@ class _MarketView extends StatelessWidget {
               },
             );
           },
+        ),
+      ),
+    );
+  }
+}
+
+class _CategoryChip extends StatelessWidget {
+  final String label;
+  final bool isSelected;
+
+  const _CategoryChip({required this.label, this.isSelected = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      decoration: BoxDecoration(
+        color: isSelected
+            ? const Color(0xff22c55e)
+            : (isDark ? const Color(0xff1f2937) : Colors.white),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: isSelected
+              ? const Color(0xff22c55e)
+              : (isDark ? const Color(0xff374151) : const Color(0xffe5e7eb)),
+        ),
+      ),
+      child: Text(
+        label,
+        style: GoogleFonts.inter(
+          fontSize: 13,
+          fontWeight: FontWeight.w600,
+          color: isSelected
+              ? Colors.white
+              : (isDark ? const Color(0xff9ca3af) : const Color(0xff6b7280)),
         ),
       ),
     );

@@ -20,5 +20,6 @@ class AuthEvent with _$AuthEvent {
   const factory AuthEvent.forgotPasswordRequested({required String email}) =
       ForgotPasswordRequested;
   const factory AuthEvent.biometricLoginRequested() = BiometricLoginRequested;
+  const factory AuthEvent.googleSignInRequested() = GoogleSignInRequested;
   const factory AuthEvent.logoutRequested() = LogoutRequested;
 }

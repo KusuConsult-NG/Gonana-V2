@@ -8,6 +8,11 @@ class WalletEntity extends Equatable {
   final String? bankName;
   final Map<String, String>? cryptoAddresses;
 
+  // KYC-gated wallet fields
+  final bool isKycVerified;
+  final Map<String, String>? multiChainAddresses; // Chain name -> Address
+  final DateTime? kycVerifiedAt;
+
   const WalletEntity({
     required this.balanceNgn,
     required this.cryptoBalanceCcd,
@@ -15,6 +20,9 @@ class WalletEntity extends Equatable {
     this.virtualAccountNumber,
     this.bankName,
     this.cryptoAddresses,
+    this.isKycVerified = false,
+    this.multiChainAddresses,
+    this.kycVerifiedAt,
   });
 
   @override
@@ -25,5 +33,8 @@ class WalletEntity extends Equatable {
     virtualAccountNumber,
     bankName,
     cryptoAddresses,
+    isKycVerified,
+    multiChainAddresses,
+    kycVerifiedAt,
   ];
 }

@@ -43,6 +43,7 @@ class _PaymentPageState extends State<PaymentPage>
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final product = widget.product;
     final fallbackProduct = {
       'name': 'Premium Rice',
@@ -55,11 +56,9 @@ class _PaymentPageState extends State<PaymentPage>
       appBar: AppBar(
         title: Text(
           'Checkout',
-          style: GoogleFonts.montserrat(
-            fontWeight: FontWeight.bold,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white
-                : Colors.black87,
+          style: GoogleFonts.inter(
+            fontWeight: FontWeight.w600,
+            color: isDark ? Colors.white : Colors.black87,
           ),
         ),
         backgroundColor: Colors.transparent,
@@ -107,17 +106,22 @@ class _PaymentPageState extends State<PaymentPage>
                           children: [
                             Text(
                               'Product',
-                              style: GoogleFonts.montserrat(
-                                color: Colors.grey,
+                              style: GoogleFonts.inter(
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
                                 fontSize: 12,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
+                            const SizedBox(height: 4),
                             Text(
                               product?.title ??
                                   fallbackProduct['name'] as String,
-                              style: GoogleFonts.montserrat(
-                                fontWeight: FontWeight.bold,
+                              style: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600,
                                 fontSize: 16,
+                                color: isDark ? Colors.white : Colors.black87,
                               ),
                             ),
                           ],
@@ -127,16 +131,20 @@ class _PaymentPageState extends State<PaymentPage>
                           children: [
                             Text(
                               'Total',
-                              style: GoogleFonts.montserrat(
-                                color: Colors.grey,
+                              style: GoogleFonts.inter(
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : Colors.grey[600],
                                 fontSize: 12,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
+                            const SizedBox(height: 4),
                             Text(
                               '₦ ${(product?.amount ?? (fallbackProduct['price'] as double)).toStringAsFixed(2)}',
-                              style: GoogleFonts.montserrat(
+                              style: GoogleFonts.inter(
                                 fontWeight: FontWeight.bold,
-                                fontSize: 16,
+                                fontSize: 18,
                                 color: AppTheme.primaryColor,
                               ),
                             ),
@@ -177,7 +185,12 @@ class _PaymentPageState extends State<PaymentPage>
                                     value: e,
                                     child: Text(
                                       e,
-                                      style: GoogleFonts.montserrat(),
+                                      style: GoogleFonts.inter(
+                                        color: isDark
+                                            ? Colors.white
+                                            : Colors.black87,
+                                        fontWeight: FontWeight.w500,
+                                      ),
                                     ),
                                   ),
                                 )
@@ -185,7 +198,10 @@ class _PaymentPageState extends State<PaymentPage>
                         onChanged: (val) {},
                         hint: Text(
                           'Select Shipping Method',
-                          style: GoogleFonts.montserrat(),
+                          style: GoogleFonts.inter(
+                            color: isDark ? Colors.grey[400] : Colors.grey[600],
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                     ),
@@ -211,8 +227,8 @@ class _PaymentPageState extends State<PaymentPage>
                       ),
                       labelColor: Colors.white,
                       unselectedLabelColor: Colors.grey[700],
-                      labelStyle: GoogleFonts.montserrat(
-                        fontWeight: FontWeight.bold,
+                      labelStyle: GoogleFonts.inter(
+                        fontWeight: FontWeight.w600,
                       ),
                       tabs: const [
                         Tab(text: 'Fiat Payment'),
@@ -275,20 +291,20 @@ class _PaymentPageState extends State<PaymentPage>
             GlassContainer(
               borderRadius: BorderRadius.circular(16),
               padding: const EdgeInsets.all(24),
-              child: Column(
+              child: const Column(
                 children: [
                   TextField(
-                    decoration: const InputDecoration(
+                    decoration: InputDecoration(
                       labelText: 'Card Number',
                       border: OutlineInputBorder(),
                       prefixIcon: Icon(Icons.credit_card),
                     ),
                     keyboardType: TextInputType.number,
                   ),
-                  const SizedBox(height: 16),
+                  SizedBox(height: 16),
                   Row(
                     children: [
-                      const Expanded(
+                      Expanded(
                         child: TextField(
                           decoration: InputDecoration(
                             labelText: 'Expiry Date',
@@ -297,8 +313,8 @@ class _PaymentPageState extends State<PaymentPage>
                           ),
                         ),
                       ),
-                      const SizedBox(width: 16),
-                      const Expanded(
+                      SizedBox(width: 16),
+                      Expanded(
                         child: TextField(
                           decoration: InputDecoration(
                             labelText: 'CVV',
@@ -404,8 +420,8 @@ class _PaymentPageState extends State<PaymentPage>
                 children: [
                   RadioListTile<bool>(
                     value: true,
-                    // ignore: deprecated_member_use
                     groupValue: true,
+                    // ignore: deprecated_member_use
                     onChanged: (v) {},
                     secondary: const CircleAvatar(
                       backgroundColor: Colors.orange,
@@ -417,8 +433,8 @@ class _PaymentPageState extends State<PaymentPage>
                   const Divider(),
                   RadioListTile<bool>(
                     value: false,
-                    // ignore: deprecated_member_use
                     groupValue: true,
+                    // ignore: deprecated_member_use
                     onChanged: (v) {},
                     secondary: const CircleAvatar(
                       backgroundColor: Colors.purple,
@@ -560,8 +576,12 @@ class _PaymentMethodCard extends StatelessWidget {
             const SizedBox(height: 8),
             Text(
               title,
-              style: GoogleFonts.montserrat(
-                color: isSelected ? Colors.white : Colors.grey[700],
+              style: GoogleFonts.inter(
+                color: isSelected
+                    ? Colors.white
+                    : (Theme.of(context).brightness == Brightness.dark
+                          ? Colors.grey[400]
+                          : Colors.grey[700]),
                 fontWeight: FontWeight.w600,
               ),
             ),

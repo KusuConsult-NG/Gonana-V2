@@ -53,7 +53,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
         appBar: AppBar(
           title: Text(
             'Change Password',
-            style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+            style: GoogleFonts.inter(fontWeight: FontWeight.bold),
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
@@ -93,9 +93,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                     children: [
                       Text(
                         'Update your password',
-                        style: GoogleFonts.montserrat(
-                          fontWeight: FontWeight.w600,
-                        ),
+                        style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                       ),
                       const SizedBox(height: 16),
                       _buildPasswordField(
@@ -162,7 +160,7 @@ class _ChangePasswordPageState extends State<ChangePasswordPage> {
                                     )
                                   : Text(
                                       'Update Password',
-                                      style: GoogleFonts.montserrat(
+                                      style: GoogleFonts.inter(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white,

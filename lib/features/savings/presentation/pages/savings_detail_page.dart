@@ -28,7 +28,7 @@ class SavingsDetailPage extends StatelessWidget {
       appBar: AppBar(
         title: Text(
           data['name'],
-          style: GoogleFonts.montserrat(
+          style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).brightness == Brightness.dark
                 ? Colors.white
@@ -85,12 +85,12 @@ class SavingsDetailPage extends StatelessWidget {
                       children: [
                         Text(
                           'Total Balance',
-                          style: GoogleFonts.montserrat(color: Colors.grey),
+                          style: GoogleFonts.inter(color: Colors.grey),
                         ),
                         const SizedBox(height: 8),
                         Text(
                           '₦ ${(data['balance'] as double).toStringAsFixed(2)}',
-                          style: GoogleFonts.montserrat(
+                          style: GoogleFonts.inter(
                             fontSize: 32,
                             fontWeight: FontWeight.bold,
                             color: AppTheme.primaryColor,
@@ -111,7 +111,7 @@ class SavingsDetailPage extends StatelessWidget {
                               ),
                               child: Text(
                                 '+₦ ${data['profit']}',
-                                style: GoogleFonts.montserrat(
+                                style: GoogleFonts.inter(
                                   color: Colors.green,
                                   fontWeight: FontWeight.bold,
                                 ),
@@ -120,7 +120,7 @@ class SavingsDetailPage extends StatelessWidget {
                             const SizedBox(width: 8),
                             Text(
                               'Total Profit',
-                              style: GoogleFonts.montserrat(
+                              style: GoogleFonts.inter(
                                 fontSize: 12,
                                 color: Colors.grey,
                               ),
@@ -141,7 +141,7 @@ class SavingsDetailPage extends StatelessWidget {
                       child: Center(
                         child: Text(
                           'Performance Chart (Mock)',
-                          style: GoogleFonts.montserrat(color: Colors.grey),
+                          style: GoogleFonts.inter(color: Colors.grey),
                         ),
                       ),
                     ),
@@ -153,7 +153,7 @@ class SavingsDetailPage extends StatelessWidget {
                     alignment: Alignment.centerLeft,
                     child: Text(
                       'Recent Activity',
-                      style: GoogleFonts.montserrat(
+                      style: GoogleFonts.inter(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
                       ),
@@ -198,7 +198,7 @@ class SavingsDetailPage extends StatelessWidget {
             ),
             child: Text(
               'Add Funds',
-              style: GoogleFonts.montserrat(
+              style: GoogleFonts.inter(
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
                 color: Colors.white,
@@ -237,21 +237,18 @@ class SavingsDetailPage extends StatelessWidget {
                 children: [
                   Text(
                     title,
-                    style: GoogleFonts.montserrat(fontWeight: FontWeight.w600),
+                    style: GoogleFonts.inter(fontWeight: FontWeight.w600),
                   ),
                   Text(
                     date,
-                    style: GoogleFonts.montserrat(
-                      fontSize: 12,
-                      color: Colors.grey,
-                    ),
+                    style: GoogleFonts.inter(fontSize: 12, color: Colors.grey),
                   ),
                 ],
               ),
             ),
             Text(
               amount,
-              style: GoogleFonts.montserrat(
+              style: GoogleFonts.inter(
                 fontWeight: FontWeight.bold,
                 color: Colors.green,
               ),

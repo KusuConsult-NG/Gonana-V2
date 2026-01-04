@@ -31,6 +31,8 @@ class ProductModel extends ProductEntity {
     super.shippingPrice,
     super.rating = 0.0,
     super.reviewCount = 0,
+    super.initialStock,
+    super.soldCount,
   }) : super(images: images);
 
   factory ProductModel.fromJson(Map<String, dynamic> json) {
@@ -63,6 +65,8 @@ class ProductModel extends ProductEntity {
       shippingPrice: (json['shippingPrice'] as num?)?.toDouble(),
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       reviewCount: json['reviewCount'] as int? ?? 0,
+      initialStock: json['initialStock'] as int?,
+      soldCount: json['soldCount'] as int?,
     );
   }
 
@@ -92,5 +96,7 @@ class ProductModel extends ProductEntity {
     'shippingPrice': shippingPrice,
     'rating': rating,
     'reviewCount': reviewCount,
+    'initialStock': initialStock,
+    'soldCount': soldCount,
   };
 }

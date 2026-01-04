@@ -1,7 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../config/injection.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/glass_container.dart';
+import '../../../../core/widgets/scaffold_with_background.dart';
 import '../bloc/chat_detail_bloc.dart';
 import '../bloc/chat_detail_event.dart';
 import '../bloc/chat_detail_state.dart';
@@ -29,13 +33,29 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
   Widget build(BuildContext context) {
     // Current user ID for determining "isMe"
     final currentUserId = FirebaseAuth.instance.currentUser?.uid ?? '';
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return BlocProvider(
       create: (context) =>
           getIt<ChatDetailBloc>()..add(ChatDetailEvent.started(widget.chatId)),
-      child: Scaffold(
+      child: ScaffoldWithBackground(
         appBar: AppBar(
-          title: const Text('Chat'), // In real app, pass dynamic name
+          title: Text(
+            'Chat',
+            style: GoogleFonts.inter(
+              fontWeight: FontWeight.w600,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back_ios,
+              color: isDark ? Colors.white : Colors.black87,
+            ),
+            onPressed: () => Navigator.of(context).pop(),
+          ),
         ),
         body: Column(
           children: [
@@ -48,12 +68,23 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                     error: (message) => Center(child: Text('Error: $message')),
                     loaded: (messages) {
                       if (messages.isEmpty) {
-                        return const Center(
-                          child: Text('No messages yet. Say hi!'),
+                        return Center(
+                          child: Text(
+                            'No messages yet. Say hi!',
+                            style: GoogleFonts.inter(
+                              color: isDark
+                                  ? Colors.grey[400]
+                                  : Colors.grey[600],
+                            ),
+                          ),
                         );
                       }
                       return ListView.builder(
                         reverse: true, // Show latest at bottom
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         itemCount: messages.length,
                         itemBuilder: (context, index) {
                           final message = messages[index];
@@ -70,50 +101,73 @@ class _ChatDetailPageState extends State<ChatDetailPage> {
                 },
               ),
             ),
-            _buildInputArea(context),
+            _buildInputArea(context, isDark),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildInputArea(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.all(8.0),
-      color: Colors.white,
-      child: Row(
-        children: [
-          Expanded(
-            child: TextField(
-              controller: _controller,
-              decoration: const InputDecoration(
-                hintText: 'Type a message...',
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.all(Radius.circular(24.0)),
+  Widget _buildInputArea(BuildContext context, bool isDark) {
+    return GlassContainer(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+      child: SafeArea(
+        child: Row(
+          children: [
+            Expanded(
+              child: Container(
+                decoration: BoxDecoration(
+                  color: isDark ? Colors.grey[800] : Colors.grey[100],
+                  borderRadius: BorderRadius.circular(24),
                 ),
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 16,
-                  vertical: 8,
+                child: TextField(
+                  controller: _controller,
+                  style: GoogleFonts.inter(
+                    color: isDark ? Colors.white : Colors.black87,
+                  ),
+                  decoration: InputDecoration(
+                    hintText: 'Type a message...',
+                    hintStyle: GoogleFonts.inter(
+                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                    ),
+                    border: InputBorder.none,
+                    contentPadding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 10,
+                    ),
+                  ),
+                  textCapitalization: TextCapitalization.sentences,
+                  minLines: 1,
+                  maxLines: 4,
                 ),
               ),
-              textCapitalization: TextCapitalization.sentences,
             ),
-          ),
-          const SizedBox(width: 8),
-          IconButton(
-            icon: const Icon(Icons.send),
-            color: Theme.of(context).primaryColor,
-            onPressed: () {
-              final text = _controller.text.trim();
-              if (text.isNotEmpty) {
-                context.read<ChatDetailBloc>().add(
-                  ChatDetailEvent.sendMessage(text),
-                );
-                _controller.clear();
-              }
-            },
-          ),
-        ],
+            const SizedBox(width: 12),
+            Container(
+              decoration: const BoxDecoration(
+                color: AppTheme.primaryColor,
+                shape: BoxShape.circle,
+              ),
+              child: IconButton(
+                icon: const Icon(
+                  Icons.send_rounded,
+                  color: Colors.white,
+                  size: 20,
+                ),
+                onPressed: () {
+                  final text = _controller.text.trim();
+                  if (text.isNotEmpty) {
+                    context.read<ChatDetailBloc>().add(
+                      ChatDetailEvent.sendMessage(text),
+                    );
+                    _controller.clear();
+                  }
+                },
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }

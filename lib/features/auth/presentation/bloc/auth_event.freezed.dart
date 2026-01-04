@@ -55,7 +55,7 @@ extension AuthEventPatterns on AuthEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( Started value)?  started,TResult Function( SignInRequested value)?  signInRequested,TResult Function( SignUpRequested value)?  signUpRequested,TResult Function( ForgotPasswordRequested value)?  forgotPasswordRequested,TResult Function( BiometricLoginRequested value)?  biometricLoginRequested,TResult Function( LogoutRequested value)?  logoutRequested,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( Started value)?  started,TResult Function( SignInRequested value)?  signInRequested,TResult Function( SignUpRequested value)?  signUpRequested,TResult Function( ForgotPasswordRequested value)?  forgotPasswordRequested,TResult Function( BiometricLoginRequested value)?  biometricLoginRequested,TResult Function( GoogleSignInRequested value)?  googleSignInRequested,TResult Function( LogoutRequested value)?  logoutRequested,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case Started() when started != null:
@@ -63,7 +63,8 @@ return started(_that);case SignInRequested() when signInRequested != null:
 return signInRequested(_that);case SignUpRequested() when signUpRequested != null:
 return signUpRequested(_that);case ForgotPasswordRequested() when forgotPasswordRequested != null:
 return forgotPasswordRequested(_that);case BiometricLoginRequested() when biometricLoginRequested != null:
-return biometricLoginRequested(_that);case LogoutRequested() when logoutRequested != null:
+return biometricLoginRequested(_that);case GoogleSignInRequested() when googleSignInRequested != null:
+return googleSignInRequested(_that);case LogoutRequested() when logoutRequested != null:
 return logoutRequested(_that);case _:
   return orElse();
 
@@ -82,7 +83,7 @@ return logoutRequested(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( Started value)  started,required TResult Function( SignInRequested value)  signInRequested,required TResult Function( SignUpRequested value)  signUpRequested,required TResult Function( ForgotPasswordRequested value)  forgotPasswordRequested,required TResult Function( BiometricLoginRequested value)  biometricLoginRequested,required TResult Function( LogoutRequested value)  logoutRequested,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( Started value)  started,required TResult Function( SignInRequested value)  signInRequested,required TResult Function( SignUpRequested value)  signUpRequested,required TResult Function( ForgotPasswordRequested value)  forgotPasswordRequested,required TResult Function( BiometricLoginRequested value)  biometricLoginRequested,required TResult Function( GoogleSignInRequested value)  googleSignInRequested,required TResult Function( LogoutRequested value)  logoutRequested,}){
 final _that = this;
 switch (_that) {
 case Started():
@@ -90,7 +91,8 @@ return started(_that);case SignInRequested():
 return signInRequested(_that);case SignUpRequested():
 return signUpRequested(_that);case ForgotPasswordRequested():
 return forgotPasswordRequested(_that);case BiometricLoginRequested():
-return biometricLoginRequested(_that);case LogoutRequested():
+return biometricLoginRequested(_that);case GoogleSignInRequested():
+return googleSignInRequested(_that);case LogoutRequested():
 return logoutRequested(_that);case _:
   throw StateError('Unexpected subclass');
 
@@ -108,7 +110,7 @@ return logoutRequested(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( Started value)?  started,TResult? Function( SignInRequested value)?  signInRequested,TResult? Function( SignUpRequested value)?  signUpRequested,TResult? Function( ForgotPasswordRequested value)?  forgotPasswordRequested,TResult? Function( BiometricLoginRequested value)?  biometricLoginRequested,TResult? Function( LogoutRequested value)?  logoutRequested,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( Started value)?  started,TResult? Function( SignInRequested value)?  signInRequested,TResult? Function( SignUpRequested value)?  signUpRequested,TResult? Function( ForgotPasswordRequested value)?  forgotPasswordRequested,TResult? Function( BiometricLoginRequested value)?  biometricLoginRequested,TResult? Function( GoogleSignInRequested value)?  googleSignInRequested,TResult? Function( LogoutRequested value)?  logoutRequested,}){
 final _that = this;
 switch (_that) {
 case Started() when started != null:
@@ -116,7 +118,8 @@ return started(_that);case SignInRequested() when signInRequested != null:
 return signInRequested(_that);case SignUpRequested() when signUpRequested != null:
 return signUpRequested(_that);case ForgotPasswordRequested() when forgotPasswordRequested != null:
 return forgotPasswordRequested(_that);case BiometricLoginRequested() when biometricLoginRequested != null:
-return biometricLoginRequested(_that);case LogoutRequested() when logoutRequested != null:
+return biometricLoginRequested(_that);case GoogleSignInRequested() when googleSignInRequested != null:
+return googleSignInRequested(_that);case LogoutRequested() when logoutRequested != null:
 return logoutRequested(_that);case _:
   return null;
 
@@ -134,14 +137,15 @@ return logoutRequested(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  started,TResult Function( String email,  String password)?  signInRequested,TResult Function( String firstName,  String lastName,  String phoneNumber,  String email,  String password,  String country)?  signUpRequested,TResult Function( String email)?  forgotPasswordRequested,TResult Function()?  biometricLoginRequested,TResult Function()?  logoutRequested,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  started,TResult Function( String email,  String password)?  signInRequested,TResult Function( String firstName,  String lastName,  String phoneNumber,  String email,  String password,  String country)?  signUpRequested,TResult Function( String email)?  forgotPasswordRequested,TResult Function()?  biometricLoginRequested,TResult Function()?  googleSignInRequested,TResult Function()?  logoutRequested,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case Started() when started != null:
 return started();case SignInRequested() when signInRequested != null:
 return signInRequested(_that.email,_that.password);case SignUpRequested() when signUpRequested != null:
 return signUpRequested(_that.firstName,_that.lastName,_that.phoneNumber,_that.email,_that.password,_that.country);case ForgotPasswordRequested() when forgotPasswordRequested != null:
 return forgotPasswordRequested(_that.email);case BiometricLoginRequested() when biometricLoginRequested != null:
-return biometricLoginRequested();case LogoutRequested() when logoutRequested != null:
+return biometricLoginRequested();case GoogleSignInRequested() when googleSignInRequested != null:
+return googleSignInRequested();case LogoutRequested() when logoutRequested != null:
 return logoutRequested();case _:
   return orElse();
 
@@ -160,14 +164,15 @@ return logoutRequested();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  started,required TResult Function( String email,  String password)  signInRequested,required TResult Function( String firstName,  String lastName,  String phoneNumber,  String email,  String password,  String country)  signUpRequested,required TResult Function( String email)  forgotPasswordRequested,required TResult Function()  biometricLoginRequested,required TResult Function()  logoutRequested,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  started,required TResult Function( String email,  String password)  signInRequested,required TResult Function( String firstName,  String lastName,  String phoneNumber,  String email,  String password,  String country)  signUpRequested,required TResult Function( String email)  forgotPasswordRequested,required TResult Function()  biometricLoginRequested,required TResult Function()  googleSignInRequested,required TResult Function()  logoutRequested,}) {final _that = this;
 switch (_that) {
 case Started():
 return started();case SignInRequested():
 return signInRequested(_that.email,_that.password);case SignUpRequested():
 return signUpRequested(_that.firstName,_that.lastName,_that.phoneNumber,_that.email,_that.password,_that.country);case ForgotPasswordRequested():
 return forgotPasswordRequested(_that.email);case BiometricLoginRequested():
-return biometricLoginRequested();case LogoutRequested():
+return biometricLoginRequested();case GoogleSignInRequested():
+return googleSignInRequested();case LogoutRequested():
 return logoutRequested();case _:
   throw StateError('Unexpected subclass');
 
@@ -185,14 +190,15 @@ return logoutRequested();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  started,TResult? Function( String email,  String password)?  signInRequested,TResult? Function( String firstName,  String lastName,  String phoneNumber,  String email,  String password,  String country)?  signUpRequested,TResult? Function( String email)?  forgotPasswordRequested,TResult? Function()?  biometricLoginRequested,TResult? Function()?  logoutRequested,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  started,TResult? Function( String email,  String password)?  signInRequested,TResult? Function( String firstName,  String lastName,  String phoneNumber,  String email,  String password,  String country)?  signUpRequested,TResult? Function( String email)?  forgotPasswordRequested,TResult? Function()?  biometricLoginRequested,TResult? Function()?  googleSignInRequested,TResult? Function()?  logoutRequested,}) {final _that = this;
 switch (_that) {
 case Started() when started != null:
 return started();case SignInRequested() when signInRequested != null:
 return signInRequested(_that.email,_that.password);case SignUpRequested() when signUpRequested != null:
 return signUpRequested(_that.firstName,_that.lastName,_that.phoneNumber,_that.email,_that.password,_that.country);case ForgotPasswordRequested() when forgotPasswordRequested != null:
 return forgotPasswordRequested(_that.email);case BiometricLoginRequested() when biometricLoginRequested != null:
-return biometricLoginRequested();case LogoutRequested() when logoutRequested != null:
+return biometricLoginRequested();case GoogleSignInRequested() when googleSignInRequested != null:
+return googleSignInRequested();case LogoutRequested() when logoutRequested != null:
 return logoutRequested();case _:
   return null;
 
@@ -467,6 +473,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'AuthEvent.biometricLoginRequested()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class GoogleSignInRequested implements AuthEvent {
+  const GoogleSignInRequested();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GoogleSignInRequested);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AuthEvent.googleSignInRequested()';
 }
 
 

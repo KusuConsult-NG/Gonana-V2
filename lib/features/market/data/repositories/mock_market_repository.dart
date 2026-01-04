@@ -11,13 +11,13 @@ import '../../domain/repositories/market_repository.dart';
 class MockMarketRepository implements MarketRepository {
   // In-memory mock data
   final List<ProductEntity> _mockProducts = [
-    ProductEntity(
+    const ProductEntity(
       id: '1',
       title: 'Fresh Organic Tomatoes',
       description:
           'Locally grown, pesticide-free organic tomatoes. Perfect for salads and cooking.',
       amount: 1500.0,
-      images: const [
+      images: [
         'https://images.unsplash.com/photo-1592924357228-91a4daadcfea?auto=format&fit=crop&q=80&w=1000',
       ],
       location: 'Abuja, Nigeria',
@@ -25,15 +25,15 @@ class MockMarketRepository implements MarketRepository {
       sellerName: 'Green Earth Farms',
       quantity: 50,
       isHotDeal: true,
-      shippingMethods: const ['Delivery', 'Pickup'],
+      shippingMethods: ['Delivery', 'Pickup'],
     ),
-    ProductEntity(
+    const ProductEntity(
       id: '2',
       title: 'Premium Brown Rice',
       description:
           'High-quality brown rice, rich in fiber and nutrients. 50kg bag.',
       amount: 45000.0,
-      images: const [
+      images: [
         'https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&q=80&w=1000',
       ],
       location: 'Lagos, Nigeria',
@@ -41,15 +41,15 @@ class MockMarketRepository implements MarketRepository {
       sellerName: 'Naija Grains',
       quantity: 100,
       isHotDeal: true,
-      shippingMethods: const ['Delivery'],
+      shippingMethods: ['Delivery'],
     ),
-    ProductEntity(
+    const ProductEntity(
       id: '3',
       title: 'Yellow Maize',
       description:
           'Dried yellow maize, suitable for animal feed or processing.',
       amount: 12000.0,
-      images: const [
+      images: [
         'https://images.unsplash.com/photo-1551754655-cd27e38d2076?auto=format&fit=crop&q=80&w=1000',
       ],
       location: 'Kano, Nigeria',
@@ -58,12 +58,12 @@ class MockMarketRepository implements MarketRepository {
       quantity: 200,
       isHotDeal: false,
     ),
-    ProductEntity(
+    const ProductEntity(
       id: '4',
       title: 'Red Palm Oil',
       description: 'Pure, unadulterated red palm oil. 25 Litre keg.',
       amount: 28000.0,
-      images: const [
+      images: [
         'https://images.unsplash.com/photo-1620662706375-8f71d5b9b28f?auto=format&fit=crop&q=80&w=1000',
       ],
       location: 'Enugu, Nigeria',
@@ -72,13 +72,13 @@ class MockMarketRepository implements MarketRepository {
       quantity: 30,
       isHotDeal: false,
     ),
-    ProductEntity(
+    const ProductEntity(
       id: '5',
       title: 'Irish Potatoes',
       description:
           'Fresh Irish potatoes from Jos. Great for chips and boiling.',
       amount: 8000.0,
-      images: const [
+      images: [
         'https://images.unsplash.com/photo-1518977676601-b53f82a6b696?auto=format&fit=crop&q=80&w=1000',
       ],
       location: 'Jos, Nigeria',

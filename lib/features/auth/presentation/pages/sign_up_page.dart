@@ -431,8 +431,103 @@ class _SignupPageState extends State<SignupPage> {
                           ),
 
                           const SizedBox(height: 24),
+
+                          // Divider with "OR"
                           FadeInUp(
                             delay: const Duration(milliseconds: 1100),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Divider(
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.grey[700]
+                                        : Colors.grey[300],
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    horizontal: 16,
+                                  ),
+                                  child: Text(
+                                    'OR',
+                                    style: GoogleFonts.montserrat(
+                                      color:
+                                          Theme.of(context).brightness ==
+                                              Brightness.dark
+                                          ? Colors.grey[400]
+                                          : Colors.grey[600],
+                                      fontSize: 12,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                Expanded(
+                                  child: Divider(
+                                    color:
+                                        Theme.of(context).brightness ==
+                                            Brightness.dark
+                                        ? Colors.grey[700]
+                                        : Colors.grey[300],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+
+                          // Google Sign-In Button
+                          FadeInUp(
+                            delay: const Duration(milliseconds: 1200),
+                            child: OutlinedButton.icon(
+                              onPressed: () {
+                                context.read<AuthBloc>().add(
+                                  const AuthEvent.googleSignInRequested(),
+                                );
+                              },
+                              icon: Image.asset(
+                                'assets/images/google_icon.png',
+                                width: 24,
+                                height: 24,
+                                errorBuilder: (_, __, ___) =>
+                                    const Icon(Icons.g_mobiledata, size: 24),
+                              ),
+                              label: Text(
+                                'Continue with Google',
+                                style: GoogleFonts.montserrat(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                              style: OutlinedButton.styleFrom(
+                                padding: const EdgeInsets.symmetric(
+                                  vertical: 14,
+                                ),
+                                side: BorderSide(
+                                  color:
+                                      Theme.of(context).brightness ==
+                                          Brightness.dark
+                                      ? Colors.grey[700]!
+                                      : Colors.grey[300]!,
+                                  width: 1.5,
+                                ),
+                                foregroundColor:
+                                    Theme.of(context).brightness ==
+                                        Brightness.dark
+                                    ? Colors.white
+                                    : Colors.black87,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 24),
+                          FadeInUp(
+                            delay: const Duration(milliseconds: 1300),
                             child: Row(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [

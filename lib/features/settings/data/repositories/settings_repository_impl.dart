@@ -53,7 +53,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
         return UserModel.fromJson(jsonMap);
       }
     } catch (e) {
-      print('Error loading user from prefs: $e');
+      debugPrint('Error loading user from prefs: $e');
     }
     return null;
   }

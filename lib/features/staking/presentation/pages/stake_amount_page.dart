@@ -23,7 +23,7 @@ class _StakeAmountPageState extends State<StakeAmountPage> {
       appBar: AppBar(
         title: Text(
           'Stake ${widget.pool['name']}',
-          style: GoogleFonts.montserrat(
+          style: GoogleFonts.inter(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).brightness == Brightness.dark
                 ? Colors.white
@@ -69,7 +69,7 @@ class _StakeAmountPageState extends State<StakeAmountPage> {
                         children: [
                           Text(
                             'Enter Amount',
-                            style: GoogleFonts.montserrat(
+                            style: GoogleFonts.inter(
                               fontSize: 16,
                               color: Colors.grey,
                             ),
@@ -79,7 +79,7 @@ class _StakeAmountPageState extends State<StakeAmountPage> {
                             controller: _amountController,
                             keyboardType: TextInputType.number,
                             textAlign: TextAlign.center,
-                            style: GoogleFonts.montserrat(
+                            style: GoogleFonts.inter(
                               fontSize: 32,
                               fontWeight: FontWeight.bold,
                             ),
@@ -92,7 +92,7 @@ class _StakeAmountPageState extends State<StakeAmountPage> {
                           const SizedBox(height: 16),
                           Text(
                             'Available Balance: ₦ 1,500,000',
-                            style: GoogleFonts.montserrat(
+                            style: GoogleFonts.inter(
                               color: AppTheme.primaryColor,
                               fontWeight: FontWeight.w600,
                             ),
@@ -144,13 +144,10 @@ class _StakeAmountPageState extends State<StakeAmountPage> {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Text(label, style: GoogleFonts.montserrat(color: Colors.grey)),
+        Text(label, style: GoogleFonts.inter(color: Colors.grey)),
         Text(
           value,
-          style: GoogleFonts.montserrat(
-            fontWeight: FontWeight.bold,
-            fontSize: 16,
-          ),
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold, fontSize: 16),
         ),
       ],
     );

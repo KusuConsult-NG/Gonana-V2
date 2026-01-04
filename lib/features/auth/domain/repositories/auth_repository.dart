@@ -18,4 +18,5 @@ abstract class AuthRepository {
   Future<Either<String, void>> signOut();
   Future<Either<String, AuthEntity>> getCurrentAuthentication();
   Future<Either<String, bool>> authenticateBiometric();
+  Future<Either<String, AuthEntity>> signInWithGoogle();
 }

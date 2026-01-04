@@ -1,4 +1,3 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -6,6 +5,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/glass_container.dart';
 import '../../../../core/widgets/scaffold_with_background.dart';
+import '../../../../core/widgets/image_carousel.dart';
 import '../../domain/entities/product_entity.dart';
 import '../bloc/cart_bloc.dart';
 import '../../../../config/injection.dart';
@@ -24,7 +24,6 @@ class ProductDetailsPage extends StatefulWidget {
 
 class _ProductDetailsPageState extends State<ProductDetailsPage> {
   int _selectedQuantity = 1;
-  int _currentImageIndex = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -76,79 +75,15 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Product Image
-                  // Product Images Carousel
-                  Stack(
-                    alignment: Alignment.bottomCenter,
-                    children: [
-                      Hero(
-                        tag: 'product_${widget.product.id}',
-                        child: ClipRRect(
-                          borderRadius: BorderRadius.circular(20),
-                          child: SizedBox(
-                            height: 300,
-                            width: double.infinity,
-                            child: PageView.builder(
-                              itemCount: widget.product.images.isNotEmpty
-                                  ? widget.product.images.length
-                                  : 1,
-                              onPageChanged: (index) {
-                                setState(() {
-                                  _currentImageIndex = index;
-                                });
-                              },
-                              itemBuilder: (context, index) {
-                                final imageUrl =
-                                    widget.product.images.isNotEmpty
-                                    ? widget.product.images[index]
-                                    : widget.product.imageUrl;
-                                return Image.network(
-                                  imageUrl,
-                                  width: double.infinity,
-                                  height: 300, // Explicit height match
-                                  fit: BoxFit.cover,
-                                  errorBuilder: (context, error, stackTrace) {
-                                    return Container(
-                                      width: double.infinity,
-                                      height: 300,
-                                      color: Colors.grey[300],
-                                      child: const Icon(
-                                        Icons.image_not_supported,
-                                        size: 50,
-                                      ),
-                                    );
-                                  },
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                      // Indicators
-                      if (widget.product.images.length > 1)
-                        Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: List.generate(
-                              widget.product.images.length,
-                              (index) => Container(
-                                margin: const EdgeInsets.symmetric(
-                                  horizontal: 4,
-                                ),
-                                width: 8,
-                                height: 8,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: _currentImageIndex == index
-                                      ? AppTheme.primaryColor
-                                      : Colors.white.withValues(alpha: 0.5),
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
+                  // Product Images Carousel with Zoom
+                  Hero(
+                    tag: 'product_${widget.product.id}',
+                    child: ImageCarousel(
+                      imageUrls: widget.product.images.isNotEmpty
+                          ? widget.product.images
+                          : [widget.product.imageUrl],
+                      height: 320,
+                    ),
                   ),
                   const SizedBox(height: 24),
 
@@ -345,7 +280,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                             loading: () => const Center(
                               child: CircularProgressIndicator(),
                             ),
-                            error: (msg) => Text(
+                            error: (msg) => const Text(
                               'Error loading reviews',
                               style: TextStyle(color: Colors.red),
                             ),
@@ -397,7 +332,7 @@ class _ProductDetailsPageState extends State<ProductDetailsPage> {
                                                 ),
                                               ),
                                               const Spacer(),
-                                              Icon(
+                                              const Icon(
                                                 Icons.star,
                                                 size: 14,
                                                 color: Colors.amber,

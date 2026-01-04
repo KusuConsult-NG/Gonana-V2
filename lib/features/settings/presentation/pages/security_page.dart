@@ -42,7 +42,7 @@ class _SecurityPageState extends State<SecurityPage> {
       appBar: AppBar(
         title: Text(
           'Security',
-          style: GoogleFonts.montserrat(fontWeight: FontWeight.bold),
+          style: GoogleFonts.inter(fontWeight: FontWeight.bold),
         ),
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -136,7 +136,7 @@ class _SecurityPageState extends State<SecurityPage> {
                         },
                         title: Text(
                           'Biometrics',
-                          style: GoogleFonts.montserrat(
+                          style: GoogleFonts.inter(
                             fontWeight: FontWeight.w600,
                             color:
                                 Theme.of(context).brightness == Brightness.dark
@@ -146,7 +146,7 @@ class _SecurityPageState extends State<SecurityPage> {
                         ),
                         subtitle: Text(
                           'Enable fingerprint login',
-                          style: GoogleFonts.montserrat(color: Colors.grey),
+                          style: GoogleFonts.inter(color: Colors.grey),
                         ),
                         secondary: const Icon(
                           Icons.fingerprint,
