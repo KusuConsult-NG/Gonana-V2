@@ -111,7 +111,7 @@ class AppTheme {
         backgroundColor: primaryGreen,
         foregroundColor: Colors.white,
         elevation: 0,
-        shadowColor: primaryGreen.withOpacity(0.4),
+        shadowColor: primaryGreen.withValues(alpha: 0.4),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: GoogleFonts.outfit(
@@ -243,7 +243,7 @@ class AppTheme {
         backgroundColor: primaryGreen,
         foregroundColor: Colors.white,
         elevation: 0,
-        shadowColor: primaryGreen.withOpacity(0.4),
+        shadowColor: primaryGreen.withValues(alpha: 0.4),
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         textStyle: GoogleFonts.outfit(

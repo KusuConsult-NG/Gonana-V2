@@ -1,10 +1,10 @@
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
+// import 'package:injectable/injectable.dart';
 import '../../domain/entities/staking_pool_entity.dart';
 import '../../domain/entities/user_stake_entity.dart';
 import '../../domain/repositories/staking_repository.dart';
 
-@LazySingleton(as: StakingRepository)
+// @LazySingleton(as: StakingRepository)
 class MockStakingRepository implements StakingRepository {
   final List<UserStakeEntity> _userStakes = [
     UserStakeEntity(

@@ -13,6 +13,9 @@ class OrderEntity extends Equatable {
   final OrderStatus status;
   final DateTime date;
   final String? logisticsCompany;
+  final String? shippingAddress;
+  final String? recipientName;
+  final String? recipientPhone;
 
   const OrderEntity({
     required this.id,
@@ -25,6 +28,9 @@ class OrderEntity extends Equatable {
     required this.status,
     required this.date,
     this.logisticsCompany,
+    this.shippingAddress,
+    this.recipientName,
+    this.recipientPhone,
   });
 
   @override
@@ -39,5 +45,8 @@ class OrderEntity extends Equatable {
     status,
     date,
     logisticsCompany,
+    shippingAddress,
+    recipientName,
+    recipientPhone,
   ];
 }

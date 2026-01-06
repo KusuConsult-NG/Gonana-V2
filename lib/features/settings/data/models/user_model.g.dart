@@ -18,6 +18,8 @@ UserModel _$UserModelFromJson(Map<String, dynamic> json) => UserModel(
   accountType: json['accountType'] as String?,
   emailActivated: json['emailActivated'] as bool?,
   kycStatus: json['kycStatus'] as String?,
+  age: (json['age'] as num?)?.toInt(),
+  gender: json['gender'] as String?,
   username: json['username'] as String?,
   pin: json['pin'] as String?,
 );
@@ -34,6 +36,8 @@ Map<String, dynamic> _$UserModelToJson(UserModel instance) => <String, dynamic>{
   'accountType': instance.accountType,
   'emailActivated': instance.emailActivated,
   'kycStatus': instance.kycStatus,
+  'age': instance.age,
+  'gender': instance.gender,
   'username': instance.username,
   'pin': instance.pin,
 };

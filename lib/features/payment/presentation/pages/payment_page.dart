@@ -8,7 +8,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:uuid/uuid.dart';
 import '../../../auth/presentation/bloc/auth_bloc.dart';
 import '../../../auth/presentation/bloc/auth_state.dart';
-import '../../data/services/payment_service.dart';
 import '../../../market/domain/entities/order_entity.dart';
 import '../../../market/domain/entities/product_entity.dart';
 import '../../../market/presentation/bloc/order_bloc.dart';
@@ -16,7 +15,8 @@ import '../../../market/presentation/bloc/order_event.dart';
 import '../../../wallet/presentation/bloc/wallet_bloc.dart';
 import 'package:get_it/get_it.dart';
 import '../../../market/domain/repositories/market_repository.dart';
-import '../widgets/paystack_webview.dart';
+import '../../presentation/bloc/payment_bloc.dart';
+import '../../../../config/injection.dart';
 
 class PaymentPage extends StatefulWidget {
   final ProductEntity? product;
@@ -30,14 +30,16 @@ class PaymentPage extends StatefulWidget {
 class _PaymentPageState extends State<PaymentPage>
     with SingleTickerProviderStateMixin {
   late TabController _tabController;
-  final PaymentService _paymentService = PaymentService();
+  final TextEditingController _addressController = TextEditingController();
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   String _selectedFiatMethod = 'Card';
+  String _selectedLogistics = 'Standard Shipping';
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _paymentService.initialize();
     // Load wallet data to ensure balance is up to date
     context.read<WalletBloc>().add(const WalletEvent.loadWalletData());
   }
@@ -45,12 +47,14 @@ class _PaymentPageState extends State<PaymentPage>
   @override
   void dispose() {
     _tabController.dispose();
+    _addressController.dispose();
+    _nameController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    // ... (Keep generic UI setup)
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final product = widget.product;
     final fallbackProduct = {
@@ -60,137 +64,290 @@ class _PaymentPageState extends State<PaymentPage>
     };
     final amount = product?.amount ?? (fallbackProduct['price'] as double);
 
-    return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: Text(
-          'Checkout',
-          style: GoogleFonts.inter(
-            fontWeight: FontWeight.w600,
-            color: isDark ? Colors.white : Colors.black87,
-          ),
-        ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back_ios,
-            color: Theme.of(context).brightness == Brightness.dark
-                ? Colors.white
-                : Colors.black87,
-          ),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: Stack(
-        children: [
-          Container(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: Theme.of(context).brightness == Brightness.dark
-                    ? [const Color(0xFF1E1E1E), const Color(0xFF000000)]
-                    : [const Color(0xFFE0F7FA), const Color(0xFFE8F5E9)],
+    return BlocProvider(
+      create: (context) => getIt<PaymentBloc>(),
+      child: BlocListener<PaymentBloc, PaymentState>(
+        listener: (context, state) {
+          state.maybeWhen(
+            success: (message) {
+              _createOrder(context, status: OrderStatus.paid);
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Payment Successful: $message'),
+                  backgroundColor: Colors.green,
+                ),
+              );
+              context.go('/home');
+            },
+            error: (message) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('Payment Failed: $message'),
+                  backgroundColor: Colors.red,
+                ),
+              );
+            },
+            orElse: () {},
+          );
+        },
+        child: Scaffold(
+          extendBodyBehindAppBar: true,
+          appBar: AppBar(
+            title: Text(
+              'Checkout',
+              style: GoogleFonts.inter(
+                fontWeight: FontWeight.w600,
+                color: isDark ? Colors.white : Colors.black87,
               ),
             ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            leading: IconButton(
+              icon: Icon(
+                Icons.arrow_back_ios,
+                color: isDark ? Colors.white : Colors.black87,
+              ),
+              onPressed: () => context.pop(),
+            ),
           ),
-          SafeArea(
-            child: Column(
-              children: [
-                const SizedBox(height: 16),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: GlassContainer(
-                    borderRadius: BorderRadius.circular(16),
-                    padding: const EdgeInsets.all(16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
+          body: Stack(
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: isDark
+                        ? [const Color(0xFF1E1E1E), const Color(0xFF000000)]
+                        : [const Color(0xFFE0F7FA), const Color(0xFFE8F5E9)],
+                  ),
+                ),
+              ),
+              SafeArea(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: GlassContainer(
+                          borderRadius: BorderRadius.circular(16),
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    'Product',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  Text(
+                                    product?.title ??
+                                        fallbackProduct['name'] as String,
+                                    style: GoogleFonts.inter(
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.end,
+                                children: [
+                                  Text(
+                                    'Total',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 12,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                  Text(
+                                    '₦ ${amount.toStringAsFixed(2)}',
+                                    style: GoogleFonts.inter(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold,
+                                      color: AppTheme.primaryColor,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // Shipping Method Dropdown
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const SizedBox(height: 16),
+                            Text(
+                              'Shipping Method',
+                              style: GoogleFonts.inter(
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white : Colors.black87,
+                              ),
+                            ),
+                            const SizedBox(height: 8),
+                            GlassContainer(
+                              borderRadius: BorderRadius.circular(12),
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 16,
+                              ),
+                              child: DropdownButtonHideUnderline(
+                                child: DropdownButton<String>(
+                                  value: _selectedLogistics,
+                                  isExpanded: true,
+                                  dropdownColor: isDark
+                                      ? const Color(0xFF1E1E1E)
+                                      : Colors.white,
+                                  icon: Icon(
+                                    Icons.local_shipping_outlined,
+                                    color: isDark
+                                        ? Colors.white70
+                                        : Colors.black54,
+                                  ),
+                                  style: GoogleFonts.inter(
+                                    color: isDark
+                                        ? Colors.white
+                                        : Colors.black87,
+                                    fontSize: 14,
+                                  ),
+                                  items:
+                                      [
+                                        'Standard Shipping',
+                                        'Farmers Shipment',
+                                      ].map((String value) {
+                                        return DropdownMenuItem<String>(
+                                          value: value,
+                                          child: Text(value),
+                                        );
+                                      }).toList(),
+                                  onChanged: (String? newValue) {
+                                    if (newValue != null) {
+                                      setState(() {
+                                        _selectedLogistics = newValue;
+                                      });
+                                    }
+                                  },
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      // Shipping Address Inputs
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'Product',
+                              'Shipping Details',
                               style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: Colors.grey,
+                                fontWeight: FontWeight.w600,
+                                color: isDark ? Colors.white : Colors.black87,
                               ),
                             ),
-                            Text(
-                              product?.title ??
-                                  fallbackProduct['name'] as String,
-                              style: GoogleFonts.inter(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                            const SizedBox(height: 8),
+                            _buildTextField(
+                              context,
+                              _nameController,
+                              'Recipient Name',
+                              Icons.person_outline,
                             ),
-                          ],
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.end,
-                          children: [
-                            Text(
-                              'Total',
-                              style: GoogleFonts.inter(
-                                fontSize: 12,
-                                color: Colors.grey,
-                              ),
+                            const SizedBox(height: 8),
+                            _buildTextField(
+                              context,
+                              _phoneController,
+                              'Phone Number',
+                              Icons.phone_outlined,
                             ),
-                            Text(
-                              '₦ ${amount.toStringAsFixed(2)}',
-                              style: GoogleFonts.inter(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryColor,
-                              ),
+                            const SizedBox(height: 8),
+                            _buildTextField(
+                              context,
+                              _addressController,
+                              'Delivery Address',
+                              Icons.location_on_outlined,
                             ),
                           ],
                         ),
-                      ],
-                    ),
-                  ),
-                ),
-                // Keep Shipping Method Dropdown if needed, or simplified
-                const SizedBox(height: 16),
-                // Tabs
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 24),
-                  child: Container(
-                    height: 50,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(25),
-                    ),
-                    child: TabBar(
-                      controller: _tabController,
-                      indicator: BoxDecoration(
-                        color: AppTheme.primaryColor,
-                        borderRadius: BorderRadius.circular(25),
                       ),
-                      labelColor: Colors.white,
-                      unselectedLabelColor: Colors.grey[700],
-                      tabs: const [
-                        Tab(text: 'Fiat Payment'),
-                        Tab(text: 'Crypto Payment'),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-                Expanded(
-                  child: TabBarView(
-                    controller: _tabController,
-                    children: [
-                      _buildFiatTab(context, amount),
-                      _buildCryptoTab(context, amount),
+                      const SizedBox(height: 24),
+                      // Tabs
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 24),
+                        child: Container(
+                          height: 50,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.5),
+                            borderRadius: BorderRadius.circular(25),
+                          ),
+                          child: TabBar(
+                            controller: _tabController,
+                            indicator: BoxDecoration(
+                              color: AppTheme.primaryColor,
+                              borderRadius: BorderRadius.circular(25),
+                            ),
+                            labelColor: Colors.white,
+                            unselectedLabelColor: Colors.grey[700],
+                            tabs: const [
+                              Tab(text: 'Paystack'),
+                              Tab(text: 'Crypto'),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 24),
+                      SizedBox(
+                        height: 400, // Fixed height for TabView
+                        child: TabBarView(
+                          controller: _tabController,
+                          children: [
+                            _buildFiatTab(context, amount),
+                            _buildCryptoTab(context, amount),
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    BuildContext context,
+    TextEditingController controller,
+    String hint,
+    IconData icon,
+  ) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return GlassContainer(
+      borderRadius: BorderRadius.circular(12),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: TextField(
+        controller: controller,
+        style: GoogleFonts.inter(color: isDark ? Colors.white : Colors.black87),
+        decoration: InputDecoration(
+          border: InputBorder.none,
+          hintText: hint,
+          hintStyle: GoogleFonts.inter(
+            color: isDark ? Colors.white54 : Colors.black38,
+          ),
+          icon: Icon(icon, color: isDark ? Colors.white70 : Colors.black54),
+        ),
       ),
     );
   }
@@ -204,7 +361,7 @@ class _PaymentPageState extends State<PaymentPage>
             children: [
               Expanded(
                 child: _PaymentMethodCard(
-                  title: 'Credit Card',
+                  title: 'Paystack',
                   icon: Icons.credit_card,
                   isSelected: _selectedFiatMethod == 'Card',
                   onTap: () => setState(() => _selectedFiatMethod = 'Card'),
@@ -228,7 +385,8 @@ class _PaymentPageState extends State<PaymentPage>
               padding: const EdgeInsets.all(24),
               child: const Center(
                 child: Text(
-                  'Card details will be handled by Paystack Secure Checkout',
+                  'Secured by Paystack',
+                  style: TextStyle(fontWeight: FontWeight.bold),
                 ),
               ),
             )
@@ -239,101 +397,45 @@ class _PaymentPageState extends State<PaymentPage>
               child: const Text('Insufficient Wallet Balance (Demo)'),
             ),
           const SizedBox(height: 32),
-          PrimaryButton(
-            text: 'Pay with Paystack',
-            onPressed: () async {
-              final authState = context.read<AuthBloc>().state;
-              final email = authState.maybeWhen(
-                authenticated: (auth) => auth.user.email,
-                orElse: () => 'guest@gonana.com',
+          BlocBuilder<PaymentBloc, PaymentState>(
+            builder: (context, state) {
+              return state.maybeWhen(
+                loading: () => const Center(child: CircularProgressIndicator()),
+                orElse: () => PrimaryButton(
+                  text: 'Pay Now',
+                  onPressed: () {
+                    // Validate
+                    if (_nameController.text.isEmpty ||
+                        _phoneController.text.isEmpty ||
+                        _addressController.text.isEmpty) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text("Please fill in all shipping details"),
+                        ),
+                      );
+                      return;
+                    }
+
+                    final authState = context.read<AuthBloc>().state;
+                    final email = authState.maybeWhen(
+                      authenticated: (auth) => auth.user.email,
+                      orElse: () => 'guest@gonana.com',
+                    );
+
+                    final reference = 'ref_${const Uuid().v4()}';
+
+                    // Trigger Native Paystack
+                    context.read<PaymentBloc>().add(
+                      PaymentEvent.payWithPaystack(
+                        context: context,
+                        amount: amount,
+                        email: email ?? 'guest@gonana.com',
+                        reference: reference,
+                      ),
+                    );
+                  },
+                ),
               );
-
-              final reference = 'ref_${const Uuid().v4()}';
-
-              try {
-                // Initialize Paystack transaction
-                final authUrl = await _paymentService.initializeTransaction(
-                  email: email ?? 'guest@gonana.com',
-                  amount: amount,
-                  reference: reference,
-                );
-
-                if (!context.mounted) return;
-
-                // Open Paystack payment page in webview
-                final result = await Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => PaystackWebView(
-                      authorizationUrl: authUrl,
-                      reference: reference,
-                      onPaymentComplete: (ref) {
-                        Navigator.pop(context, ref);
-                      },
-                      onPaymentCancel: () {
-                        Navigator.pop(context, null);
-                      },
-                    ),
-                  ),
-                );
-
-                if (!context.mounted) return;
-
-                if (result != null) {
-                  // Show verifying message
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Verifying transaction...')),
-                  );
-
-                  // Verify transaction
-                  final isVerified = await _paymentService.verifyTransaction(
-                    reference,
-                  );
-
-                  if (!context.mounted) return;
-
-                  if (isVerified) {
-                    _createOrder(context, status: OrderStatus.paid);
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Payment Verified & Successful!'),
-                        backgroundColor: Colors.green,
-                      ),
-                    );
-                    context.go('/home');
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Payment Verification Failed'),
-                        backgroundColor: Colors.red,
-                      ),
-                    );
-                  }
-                } else {
-                  // User cancelled
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Payment cancelled')),
-                  );
-                }
-              } on PaymentFailedException catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Payment Failed: ${e.message}'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              } catch (e) {
-                if (context.mounted) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('An error occurred: $e'),
-                      backgroundColor: Colors.red,
-                    ),
-                  );
-                }
-              }
             },
           ),
         ],
@@ -390,6 +492,17 @@ class _PaymentPageState extends State<PaymentPage>
               PrimaryButton(
                 text: 'Confirm Crypto Payment',
                 onPressed: () {
+                  if (_nameController.text.isEmpty ||
+                      _phoneController.text.isEmpty ||
+                      _addressController.text.isEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text("Please fill in all shipping details"),
+                      ),
+                    );
+                    return;
+                  }
+
                   context.read<WalletBloc>().add(
                     WalletEvent.payOrder(
                       amount: amount,
@@ -436,7 +549,11 @@ class _PaymentPageState extends State<PaymentPage>
       totalPrice: product.amount,
       status: status,
       date: DateTime.now(),
-      logisticsCompany: 'Standard Shipping',
+
+      logisticsCompany: _selectedLogistics,
+      shippingAddress: _addressController.text,
+      recipientName: _nameController.text,
+      recipientPhone: _phoneController.text,
     );
 
     context.read<OrderBloc>().add(OrderEvent.createOrder(order));

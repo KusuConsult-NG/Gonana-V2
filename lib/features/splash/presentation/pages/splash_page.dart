@@ -16,8 +16,14 @@ class SplashPage extends StatelessWidget {
       child: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           state.maybeWhen(
-            authenticated: (_) => context.go('/home'),
-            unauthenticated: () => context.go('/login'),
+            authenticated: (_) {
+              // User is authenticated, go to home
+              context.go('/home');
+            },
+            unauthenticated: () {
+              // User is not authenticated, go to login
+              context.go('/login');
+            },
             orElse: () {},
           );
         },

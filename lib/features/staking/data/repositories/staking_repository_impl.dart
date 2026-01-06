@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:injectable/injectable.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:dartz/dartz.dart';
 
@@ -8,7 +9,7 @@ import '../../domain/repositories/staking_repository.dart';
 import '../models/staking_pool_model.dart';
 import '../models/user_stake_model.dart';
 
-// @LazySingleton(as: StakingRepository)
+@LazySingleton(as: StakingRepository)
 class StakingRepositoryImpl implements StakingRepository {
   final FirebaseFirestore _firestore;
   final FirebaseAuth _auth;

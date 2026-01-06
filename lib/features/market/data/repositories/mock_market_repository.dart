@@ -1,13 +1,13 @@
 import 'dart:io';
 import 'package:dartz/dartz.dart';
 import 'package:uuid/uuid.dart';
-import 'package:injectable/injectable.dart';
+// import 'package:injectable/injectable.dart';
 import '../../domain/entities/product_entity.dart';
 import '../../domain/entities/review_entity.dart';
 import '../../domain/repositories/market_repository.dart';
 
 // @LazySingleton(as: MarketRepository)
-@LazySingleton(as: MarketRepository)
+// @LazySingleton(as: MarketRepository)
 class MockMarketRepository implements MarketRepository {
   // In-memory mock data
   final List<ProductEntity> _mockProducts = [

@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 import '../models/product_model.dart';
 import '../models/review_model.dart';
 import '../../domain/repositories/market_repository.dart';
@@ -9,7 +10,7 @@ import '../../domain/entities/product_entity.dart';
 import '../../domain/entities/review_entity.dart';
 import 'dart:io';
 
-// @LazySingleton(as: MarketRepository)
+@LazySingleton(as: MarketRepository)
 class MarketRepositoryImpl implements MarketRepository {
   final FirebaseFirestore _firestore;
   final FirebaseStorage _storage;
@@ -106,16 +107,45 @@ class MarketRepositoryImpl implements MarketRepository {
 
     try {
       final List<String> imageUrls = [];
-      for (var image in images) {
-        final ref = _storage
-            .ref()
-            .child('products')
-            .child(
-              '${DateTime.now().millisecondsSinceEpoch}_${imageUrls.length}.jpg',
+
+      // Upload images to Firebase Storage with better error handling
+      for (var i = 0; i < images.length; i++) {
+        try {
+          final image = images[i];
+          final ref = _storage
+              .ref()
+              .child('products')
+              .child('${DateTime.now().millisecondsSinceEpoch}_$i.jpg');
+
+          // Upload file
+          final uploadTask = await ref.putFile(image);
+
+          // Verify upload was successful
+          if (uploadTask.state != TaskState.success) {
+            return const Left(
+              'Image upload failed. Please check your connection and try again.',
             );
-        await ref.putFile(image);
-        final url = await ref.getDownloadURL();
-        imageUrls.add(url);
+          }
+
+          // Get download URL
+          final url = await ref.getDownloadURL();
+          imageUrls.add(url);
+        } catch (storageError) {
+          // Handle specific Firebase Storage errors
+          if (storageError.toString().contains('object-not-found')) {
+            return const Left(
+              'Storage configuration error. Please contact support.',
+            );
+          } else if (storageError.toString().contains('unauthorized')) {
+            return const Left(
+              'You do not have permission to upload images. Please log in again.',
+            );
+          } else {
+            return Left(
+              'Failed to upload image ${i + 1}: ${storageError.toString()}',
+            );
+          }
+        }
       }
 
       // Fetch seller profile info
@@ -145,6 +175,9 @@ class MarketRepositoryImpl implements MarketRepository {
 
       await _firestore.collection('products').add(product.toJson());
       return const Right(null);
+    } on FirebaseException catch (e) {
+      // Handle Firebase exceptions
+      return Left('Firebase error: ${e.message ?? e.code}');
     } catch (e) {
       return Left('Failed to create product: $e');
     }

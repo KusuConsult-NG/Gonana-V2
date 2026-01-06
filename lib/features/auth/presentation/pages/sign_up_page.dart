@@ -24,10 +24,15 @@ class _SignupPageState extends State<SignupPage> {
   final _lastNameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _ageController = TextEditingController();
   final _countryController = TextEditingController();
 
   String _phoneNumber = '';
   bool _isPasswordVisible = false;
+  String? _selectedGender;
+  String? _selectedUserType;
+  final List<String> _genders = ['Male', 'Female'];
+  final List<String> _userTypes = ['Buyer', 'Seller', 'Both'];
 
   @override
   void dispose() {
@@ -35,6 +40,7 @@ class _SignupPageState extends State<SignupPage> {
     _lastNameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
+    _ageController.dispose();
     _countryController.dispose();
     super.dispose();
   }
@@ -274,6 +280,42 @@ class _SignupPageState extends State<SignupPage> {
                 const SizedBox(height: 16),
                 _buildPhoneInput(),
                 const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildTextField(
+                        controller: _ageController,
+                        label: 'Age',
+                        icon: Icons.calendar_today,
+                        keyboardType: TextInputType.number,
+                        validator: (v) {
+                          if (v == null || v.isEmpty) return 'Required';
+                          if (int.tryParse(v) == null) return 'Invalid';
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Expanded(
+                      child: _buildDropdown(
+                        label: 'Gender',
+                        value: _selectedGender,
+                        items: _genders,
+                        onChanged: (v) => setState(() => _selectedGender = v),
+                        icon: Icons.person,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                _buildDropdown(
+                  label: 'I am a...',
+                  value: _selectedUserType,
+                  items: _userTypes,
+                  onChanged: (v) => setState(() => _selectedUserType = v),
+                  icon: Icons.business_center,
+                ),
+                const SizedBox(height: 16),
                 _buildCountryPicker(),
                 const SizedBox(height: 16),
                 _buildTextField(
@@ -292,7 +334,25 @@ class _SignupPageState extends State<SignupPage> {
                       () => _isPasswordVisible = !_isPasswordVisible,
                     ),
                   ),
-                  validator: (v) => v!.length < 6 ? 'Min 6 chars' : null,
+                  validator: (v) {
+                    if (v == null || v.isEmpty) return 'Password is required';
+                    if (v.length < 8) {
+                      return 'Min 8 chars, upper, lower, digit, special';
+                    }
+                    if (!RegExp(r'(?=.*[a-z])').hasMatch(v)) {
+                      return 'Must contain lowercase';
+                    }
+                    if (!RegExp(r'(?=.*[A-Z])').hasMatch(v)) {
+                      return 'Must contain uppercase';
+                    }
+                    if (!RegExp(r'(?=.*\d)').hasMatch(v)) {
+                      return 'Must contain digit';
+                    }
+                    if (!RegExp(r'(?=.*[@$!%*?&])').hasMatch(v)) {
+                      return 'Must contain special char';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 32),
                 ElevatedButton(
@@ -310,6 +370,17 @@ class _SignupPageState extends State<SignupPage> {
                               );
                               return;
                             }
+                            if (_selectedGender == null ||
+                                _selectedUserType == null) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Please select gender and user type',
+                                  ),
+                                ),
+                              );
+                              return;
+                            }
                             context.read<AuthBloc>().add(
                               AuthEvent.signUpRequested(
                                 firstName: _firstNameController.text,
@@ -318,6 +389,9 @@ class _SignupPageState extends State<SignupPage> {
                                 phoneNumber: _phoneNumber,
                                 password: _passwordController.text,
                                 country: _countryController.text,
+                                age: int.parse(_ageController.text),
+                                gender: _selectedGender!,
+                                userType: _selectedUserType!,
                               ),
                             );
                           }
@@ -604,6 +678,60 @@ class _SignupPageState extends State<SignupPage> {
               color: Colors.white,
               fontWeight: FontWeight.bold,
               decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildDropdown({
+    required String label,
+    required String? value,
+    required List<String> items,
+    required Function(String?) onChanged,
+    required IconData icon,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label,
+          style: GoogleFonts.inter(
+            color: Colors.white70,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(
+            color: Colors.black.withValues(alpha: 0.2),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          ),
+          child: DropdownButtonHideUnderline(
+            child: DropdownButton<String>(
+              value: value,
+              isExpanded: true,
+              dropdownColor: const Color(0xFF065F46),
+              style: GoogleFonts.inter(color: Colors.white),
+              icon: const Icon(Icons.arrow_drop_down, color: Colors.white70),
+              hint: Row(
+                children: [
+                  Icon(icon, color: Colors.white70, size: 20),
+                  const SizedBox(width: 12),
+                  Text(
+                    'Select',
+                    style: GoogleFonts.inter(color: Colors.white38),
+                  ),
+                ],
+              ),
+              items: items.map((String item) {
+                return DropdownMenuItem<String>(value: item, child: Text(item));
+              }).toList(),
+              onChanged: onChanged,
             ),
           ),
         ),

@@ -244,8 +244,6 @@ class _LoginPageState extends State<LoginPage> {
                   ),
                   validator: (v) {
                     if (v == null || v.isEmpty) return 'Password is required';
-                    if (v.length < 6)
-                      return 'Password must be at least 6 characters';
                     return null;
                   },
                 ),
@@ -307,6 +305,32 @@ class _LoginPageState extends State<LoginPage> {
                 _buildDivider(),
                 const SizedBox(height: 24),
                 _buildSocialButton(context),
+                const SizedBox(height: 16),
+                Center(
+                  child: IconButton(
+                    onPressed: () {
+                      context.read<AuthBloc>().add(
+                        const AuthEvent.biometricLoginRequested(),
+                      );
+                    },
+                    icon: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.3),
+                        ),
+                        shape: BoxShape.circle,
+                        color: Colors.white.withValues(alpha: 0.1),
+                      ),
+                      child: const Icon(
+                        Icons.fingerprint,
+                        color: Colors.white,
+                        size: 28,
+                      ),
+                    ),
+                    tooltip: 'Biometric Login',
+                  ),
+                ),
               ],
             ),
           ),

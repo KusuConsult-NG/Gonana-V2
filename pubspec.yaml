@@ -71,6 +71,15 @@ dependencies:
   flutter_svg: ^2.0.10+1  # Vector icons and illustrations
   webview_flutter: ^4.10.0  # For Paystack payment page
   url_launcher: ^6.3.1  # For opening URLs
+  flutter_paystack:
+    path: lib/external/flutter_paystack
+  bip39: ^1.0.6  # Mnemonic generation
+  bip32: ^2.0.0  # HD wallet key derivation
+  hex: ^0.2.0  # Hex encoding
+  crypto: ^3.0.3  # Cryptographic functions
+  flutter_secure_storage: ^9.2.2  # Secure credential storage
+
+
 
 
 dev_dependencies:

@@ -1,6 +1,5 @@
 import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
-import '../../../settings/domain/entities/user_entity.dart';
 import '../../domain/entities/auth_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
 import 'auth_event.dart';
@@ -34,37 +33,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Emitter<AuthState> emit,
   ) async {
     emit(const AuthState.loading());
-    final result = await _repository.authenticateBiometric();
-    result.fold((failure) => emit(AuthState.error(failure)), (success) {
-      if (success) {
-        // In a real app, you might fetch user details after biometric success
-        // For mock, we'll re-use the sign-in mock user logic or create a similar one
-        // But AuthRepository.authenticateBiometric returns bool.
-        // We need an AuthEntity to be 'authenticated'.
-        // Let's modify repository to return AuthEntity or fetch it here.
-        // For simplicity in this mock, let's call signIn with dummy creds or create a user.
 
-        // Better approach for Mock: Have repo return AuthEntity on biometric success?
-        // Or just manually create one here for the mock.
-        const user = UserEntity(
-          id: 'user_bio_789',
-          email: 'biometric@user.com',
-          firstName: 'Bio',
-          lastName: 'User',
-          profilePhoto: 'https://i.pravatar.cc/300',
-          accountType: 'User',
-          phone: '+000 000 0000',
-          emailActivated: true,
+    // First, perform biometric authentication
+    final biometricResult = await _repository.authenticateBiometric();
+
+    await biometricResult.fold(
+      (failure) async {
+        emit(AuthState.error(failure));
+      },
+      (success) async {
+        if (!success) {
+          emit(const AuthState.error('Biometric authentication failed'));
+          return;
+        }
+
+        // Biometric authentication succeeded
+        // Now fetch the real authenticated user
+        final authResult = await _repository.getCurrentAuthentication();
+
+        authResult.fold(
+          (failure) {
+            // User not logged in or no stored credentials
+            emit(
+              const AuthState.error(
+                'Please login with email and password first to enable biometric authentication',
+              ),
+            );
+          },
+          (auth) {
+            // Successfully retrieved real user
+            emit(AuthState.authenticated(auth));
+          },
         );
-        emit(
-          const AuthState.authenticated(
-            AuthEntity(user: user, token: 'mock_bio_token'),
-          ),
-        );
-      } else {
-        emit(const AuthState.error('Biometric authentication failed'));
-      }
-    });
+      },
+    );
   }
 
   Future<void> _onSignInRequested(
@@ -94,6 +96,9 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       email: event.email,
       password: event.password,
       country: event.country,
+      age: event.age,
+      gender: event.gender,
+      userType: event.userType,
     );
     result.fold(
       (String failure) => emit(AuthState.error(failure)),

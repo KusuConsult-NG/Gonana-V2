@@ -15,6 +15,12 @@ WalletModel _$WalletModelFromJson(Map<String, dynamic> json) => WalletModel(
   cryptoAddresses: (json['cryptoAddresses'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as String),
   ),
+  isKycVerified: json['isKycVerified'] as bool? ?? false,
+  multiChainAddresses: (json['multiChainAddresses'] as Map<String, dynamic>?)
+      ?.map((k, e) => MapEntry(k, e as String)),
+  encryptedMnemonic: json['encryptedMnemonic'] as String?,
+  encryptedSeed: json['encryptedSeed'] as String?,
+  currentChain: json['currentChain'] as String? ?? 'Ethereum',
 );
 
 Map<String, dynamic> _$WalletModelToJson(WalletModel instance) =>
@@ -25,4 +31,9 @@ Map<String, dynamic> _$WalletModelToJson(WalletModel instance) =>
       'virtualAccountNumber': instance.virtualAccountNumber,
       'bankName': instance.bankName,
       'cryptoAddresses': instance.cryptoAddresses,
+      'isKycVerified': instance.isKycVerified,
+      'multiChainAddresses': instance.multiChainAddresses,
+      'encryptedMnemonic': instance.encryptedMnemonic,
+      'encryptedSeed': instance.encryptedSeed,
+      'currentChain': instance.currentChain,
     };

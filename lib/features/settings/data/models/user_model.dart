@@ -17,6 +17,8 @@ class UserModel extends UserEntity {
     super.accountType,
     super.emailActivated,
     super.kycStatus,
+    super.age,
+    super.gender,
     super.username,
     super.pin,
   });
@@ -39,6 +41,8 @@ class UserModel extends UserEntity {
       accountType: entity.accountType,
       emailActivated: entity.emailActivated,
       kycStatus: entity.kycStatus,
+      age: entity.age,
+      gender: entity.gender,
       username: entity.username,
       pin: entity.pin,
     );
@@ -56,6 +60,8 @@ class UserModel extends UserEntity {
     String? accountType,
     bool? emailActivated,
     String? kycStatus,
+    int? age,
+    String? gender,
     String? username,
     String? pin,
   }) {
@@ -71,6 +77,8 @@ class UserModel extends UserEntity {
       accountType: accountType ?? this.accountType,
       emailActivated: emailActivated ?? this.emailActivated,
       kycStatus: kycStatus ?? this.kycStatus,
+      age: age ?? this.age,
+      gender: gender ?? this.gender,
       username: username ?? this.username,
       pin: pin ?? this.pin,
     );

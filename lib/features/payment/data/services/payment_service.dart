@@ -105,7 +105,7 @@ class PaymentService {
   }) async {
     // This method will be implemented to open webview with Paystack payment page
     // For now, returning the reference for the flow
-    final authUrl = await initializeTransaction(
+    await initializeTransaction(
       email: email,
       amount: amount,
       reference: reference,

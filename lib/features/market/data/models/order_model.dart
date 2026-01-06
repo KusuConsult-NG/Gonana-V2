@@ -15,6 +15,9 @@ class OrderModel {
   final OrderStatus status;
   final DateTime date;
   final String? logisticsCompany;
+  final String? shippingAddress;
+  final String? recipientName;
+  final String? recipientPhone;
 
   const OrderModel({
     required this.id,
@@ -27,6 +30,9 @@ class OrderModel {
     required this.status,
     required this.date,
     this.logisticsCompany,
+    this.shippingAddress,
+    this.recipientName,
+    this.recipientPhone,
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> json) =>
@@ -45,6 +51,9 @@ class OrderModel {
     status: entity.status,
     date: entity.date,
     logisticsCompany: entity.logisticsCompany,
+    shippingAddress: entity.shippingAddress,
+    recipientName: entity.recipientName,
+    recipientPhone: entity.recipientPhone,
   );
 
   OrderEntity toEntity() => OrderEntity(
@@ -58,5 +67,8 @@ class OrderModel {
     status: status,
     date: date,
     logisticsCompany: logisticsCompany,
+    shippingAddress: shippingAddress,
+    recipientName: recipientName,
+    recipientPhone: recipientPhone,
   );
 }

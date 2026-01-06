@@ -95,7 +95,7 @@ class FeedBloc extends Bloc<FeedEvent, FeedState> {
 
   Future<void> _onCreatePost(CreatePost event, Emitter<FeedState> emit) async {
     try {
-      // emit(const FeedState.loading()); // Optional: validation needs loading?
+      emit(const FeedState.loading());
       // Just call repo
       await _repository.createPost(caption: event.caption, image: event.image);
       // Refresh feed

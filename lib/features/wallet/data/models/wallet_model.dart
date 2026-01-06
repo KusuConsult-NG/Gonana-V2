@@ -13,6 +13,11 @@ class WalletModel extends WalletEntity {
     super.virtualAccountNumber,
     super.bankName,
     super.cryptoAddresses,
+    super.isKycVerified,
+    super.multiChainAddresses,
+    super.encryptedMnemonic,
+    super.encryptedSeed,
+    super.currentChain = 'Ethereum',
   });
 
   factory WalletModel.fromJson(Map<String, dynamic> json) =>

@@ -281,27 +281,30 @@ class _MarketViewState extends State<_MarketView> {
                             if (hotDeals.isNotEmpty) ...[
                               FadeInRight(
                                 duration: const Duration(milliseconds: 600),
-                                child: Row(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Text(
-                                      'Hot Deals',
-                                      style: GoogleFonts.montserrat(
-                                        fontSize: 18,
-                                        fontWeight: FontWeight.bold,
-                                        color:
-                                            Theme.of(context).brightness ==
-                                                Brightness.dark
-                                            ? Colors.white
-                                            : Colors.black87,
+                                child: GestureDetector(
+                                  onTap: () => _onCategorySelected('Hot Deals'),
+                                  child: Row(
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        'Hot Deals',
+                                        style: GoogleFonts.montserrat(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              Theme.of(context).brightness ==
+                                                  Brightness.dark
+                                              ? Colors.white
+                                              : Colors.black87,
+                                        ),
                                       ),
-                                    ),
-                                    const Icon(
-                                      Icons.arrow_forward,
-                                      color: AppTheme.primaryColor,
-                                    ),
-                                  ],
+                                      const Icon(
+                                        Icons.arrow_forward,
+                                        color: AppTheme.primaryColor,
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                               const SizedBox(height: 12),

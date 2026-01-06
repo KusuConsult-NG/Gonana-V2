@@ -1,6 +1,5 @@
 import 'dart:io';
 import 'package:dartz/dartz.dart';
-import 'package:injectable/injectable.dart';
 import '../../domain/entities/feed_entity.dart';
 import '../../domain/entities/comment_entity.dart';
 import '../../domain/repositories/feed_repository.dart';
@@ -8,7 +7,7 @@ import '../models/post_model.dart';
 import '../models/comment_model.dart';
 
 // @LazySingleton(as: FeedRepository)
-@LazySingleton(as: FeedRepository)
+// @LazySingleton(as: FeedRepository)
 class MockFeedRepository implements FeedRepository {
   final List<PostModel> _posts = [
     PostModel(

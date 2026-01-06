@@ -17,6 +17,9 @@ OrderModel _$OrderModelFromJson(Map<String, dynamic> json) => OrderModel(
   status: $enumDecode(_$OrderStatusEnumMap, json['status']),
   date: DateTime.parse(json['date'] as String),
   logisticsCompany: json['logisticsCompany'] as String?,
+  shippingAddress: json['shippingAddress'] as String?,
+  recipientName: json['recipientName'] as String?,
+  recipientPhone: json['recipientPhone'] as String?,
 );
 
 Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
@@ -31,6 +34,9 @@ Map<String, dynamic> _$OrderModelToJson(OrderModel instance) =>
       'status': _$OrderStatusEnumMap[instance.status]!,
       'date': instance.date.toIso8601String(),
       'logisticsCompany': instance.logisticsCompany,
+      'shippingAddress': instance.shippingAddress,
+      'recipientName': instance.recipientName,
+      'recipientPhone': instance.recipientPhone,
     };
 
 const _$OrderStatusEnumMap = {

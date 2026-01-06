@@ -137,12 +137,12 @@ return logoutRequested(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  started,TResult Function( String email,  String password)?  signInRequested,TResult Function( String firstName,  String lastName,  String phoneNumber,  String email,  String password,  String country)?  signUpRequested,TResult Function( String email)?  forgotPasswordRequested,TResult Function()?  biometricLoginRequested,TResult Function()?  googleSignInRequested,TResult Function()?  logoutRequested,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  started,TResult Function( String email,  String password)?  signInRequested,TResult Function( String firstName,  String lastName,  String phoneNumber,  String email,  String password,  String country,  int age,  String gender,  String userType)?  signUpRequested,TResult Function( String email)?  forgotPasswordRequested,TResult Function()?  biometricLoginRequested,TResult Function()?  googleSignInRequested,TResult Function()?  logoutRequested,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case Started() when started != null:
 return started();case SignInRequested() when signInRequested != null:
 return signInRequested(_that.email,_that.password);case SignUpRequested() when signUpRequested != null:
-return signUpRequested(_that.firstName,_that.lastName,_that.phoneNumber,_that.email,_that.password,_that.country);case ForgotPasswordRequested() when forgotPasswordRequested != null:
+return signUpRequested(_that.firstName,_that.lastName,_that.phoneNumber,_that.email,_that.password,_that.country,_that.age,_that.gender,_that.userType);case ForgotPasswordRequested() when forgotPasswordRequested != null:
 return forgotPasswordRequested(_that.email);case BiometricLoginRequested() when biometricLoginRequested != null:
 return biometricLoginRequested();case GoogleSignInRequested() when googleSignInRequested != null:
 return googleSignInRequested();case LogoutRequested() when logoutRequested != null:
@@ -164,12 +164,12 @@ return logoutRequested();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  started,required TResult Function( String email,  String password)  signInRequested,required TResult Function( String firstName,  String lastName,  String phoneNumber,  String email,  String password,  String country)  signUpRequested,required TResult Function( String email)  forgotPasswordRequested,required TResult Function()  biometricLoginRequested,required TResult Function()  googleSignInRequested,required TResult Function()  logoutRequested,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  started,required TResult Function( String email,  String password)  signInRequested,required TResult Function( String firstName,  String lastName,  String phoneNumber,  String email,  String password,  String country,  int age,  String gender,  String userType)  signUpRequested,required TResult Function( String email)  forgotPasswordRequested,required TResult Function()  biometricLoginRequested,required TResult Function()  googleSignInRequested,required TResult Function()  logoutRequested,}) {final _that = this;
 switch (_that) {
 case Started():
 return started();case SignInRequested():
 return signInRequested(_that.email,_that.password);case SignUpRequested():
-return signUpRequested(_that.firstName,_that.lastName,_that.phoneNumber,_that.email,_that.password,_that.country);case ForgotPasswordRequested():
+return signUpRequested(_that.firstName,_that.lastName,_that.phoneNumber,_that.email,_that.password,_that.country,_that.age,_that.gender,_that.userType);case ForgotPasswordRequested():
 return forgotPasswordRequested(_that.email);case BiometricLoginRequested():
 return biometricLoginRequested();case GoogleSignInRequested():
 return googleSignInRequested();case LogoutRequested():
@@ -190,12 +190,12 @@ return logoutRequested();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  started,TResult? Function( String email,  String password)?  signInRequested,TResult? Function( String firstName,  String lastName,  String phoneNumber,  String email,  String password,  String country)?  signUpRequested,TResult? Function( String email)?  forgotPasswordRequested,TResult? Function()?  biometricLoginRequested,TResult? Function()?  googleSignInRequested,TResult? Function()?  logoutRequested,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  started,TResult? Function( String email,  String password)?  signInRequested,TResult? Function( String firstName,  String lastName,  String phoneNumber,  String email,  String password,  String country,  int age,  String gender,  String userType)?  signUpRequested,TResult? Function( String email)?  forgotPasswordRequested,TResult? Function()?  biometricLoginRequested,TResult? Function()?  googleSignInRequested,TResult? Function()?  logoutRequested,}) {final _that = this;
 switch (_that) {
 case Started() when started != null:
 return started();case SignInRequested() when signInRequested != null:
 return signInRequested(_that.email,_that.password);case SignUpRequested() when signUpRequested != null:
-return signUpRequested(_that.firstName,_that.lastName,_that.phoneNumber,_that.email,_that.password,_that.country);case ForgotPasswordRequested() when forgotPasswordRequested != null:
+return signUpRequested(_that.firstName,_that.lastName,_that.phoneNumber,_that.email,_that.password,_that.country,_that.age,_that.gender,_that.userType);case ForgotPasswordRequested() when forgotPasswordRequested != null:
 return forgotPasswordRequested(_that.email);case BiometricLoginRequested() when biometricLoginRequested != null:
 return biometricLoginRequested();case GoogleSignInRequested() when googleSignInRequested != null:
 return googleSignInRequested();case LogoutRequested() when logoutRequested != null:
@@ -311,7 +311,7 @@ as String,
 
 
 class SignUpRequested implements AuthEvent {
-  const SignUpRequested({required this.firstName, required this.lastName, required this.phoneNumber, required this.email, required this.password, required this.country});
+  const SignUpRequested({required this.firstName, required this.lastName, required this.phoneNumber, required this.email, required this.password, required this.country, required this.age, required this.gender, required this.userType});
   
 
  final  String firstName;
@@ -320,6 +320,9 @@ class SignUpRequested implements AuthEvent {
  final  String email;
  final  String password;
  final  String country;
+ final  int age;
+ final  String gender;
+ final  String userType;
 
 /// Create a copy of AuthEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -331,16 +334,16 @@ $SignUpRequestedCopyWith<SignUpRequested> get copyWith => _$SignUpRequestedCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SignUpRequested&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.country, country) || other.country == country));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SignUpRequested&&(identical(other.firstName, firstName) || other.firstName == firstName)&&(identical(other.lastName, lastName) || other.lastName == lastName)&&(identical(other.phoneNumber, phoneNumber) || other.phoneNumber == phoneNumber)&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.country, country) || other.country == country)&&(identical(other.age, age) || other.age == age)&&(identical(other.gender, gender) || other.gender == gender)&&(identical(other.userType, userType) || other.userType == userType));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,firstName,lastName,phoneNumber,email,password,country);
+int get hashCode => Object.hash(runtimeType,firstName,lastName,phoneNumber,email,password,country,age,gender,userType);
 
 @override
 String toString() {
-  return 'AuthEvent.signUpRequested(firstName: $firstName, lastName: $lastName, phoneNumber: $phoneNumber, email: $email, password: $password, country: $country)';
+  return 'AuthEvent.signUpRequested(firstName: $firstName, lastName: $lastName, phoneNumber: $phoneNumber, email: $email, password: $password, country: $country, age: $age, gender: $gender, userType: $userType)';
 }
 
 
@@ -351,7 +354,7 @@ abstract mixin class $SignUpRequestedCopyWith<$Res> implements $AuthEventCopyWit
   factory $SignUpRequestedCopyWith(SignUpRequested value, $Res Function(SignUpRequested) _then) = _$SignUpRequestedCopyWithImpl;
 @useResult
 $Res call({
- String firstName, String lastName, String phoneNumber, String email, String password, String country
+ String firstName, String lastName, String phoneNumber, String email, String password, String country, int age, String gender, String userType
 });
 
 
@@ -368,7 +371,7 @@ class _$SignUpRequestedCopyWithImpl<$Res>
 
 /// Create a copy of AuthEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? firstName = null,Object? lastName = null,Object? phoneNumber = null,Object? email = null,Object? password = null,Object? country = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? firstName = null,Object? lastName = null,Object? phoneNumber = null,Object? email = null,Object? password = null,Object? country = null,Object? age = null,Object? gender = null,Object? userType = null,}) {
   return _then(SignUpRequested(
 firstName: null == firstName ? _self.firstName : firstName // ignore: cast_nullable_to_non_nullable
 as String,lastName: null == lastName ? _self.lastName : lastName // ignore: cast_nullable_to_non_nullable
@@ -376,6 +379,9 @@ as String,phoneNumber: null == phoneNumber ? _self.phoneNumber : phoneNumber // 
 as String,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
+as String,age: null == age ? _self.age : age // ignore: cast_nullable_to_non_nullable
+as int,gender: null == gender ? _self.gender : gender // ignore: cast_nullable_to_non_nullable
+as String,userType: null == userType ? _self.userType : userType // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

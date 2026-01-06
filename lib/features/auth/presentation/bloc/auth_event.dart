@@ -16,6 +16,9 @@ class AuthEvent with _$AuthEvent {
     required String email,
     required String password,
     required String country,
+    required int age,
+    required String gender,
+    required String userType,
   }) = SignUpRequested;
   const factory AuthEvent.forgotPasswordRequested({required String email}) =
       ForgotPasswordRequested;

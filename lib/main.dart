@@ -28,6 +28,7 @@ import 'features/settings/presentation/bloc/kyc_bloc.dart';
 import 'features/market/presentation/bloc/order_bloc.dart';
 import 'features/auth/presentation/bloc/auth_bloc.dart';
 import 'features/auth/presentation/bloc/auth_event.dart';
+import 'features/wallet/presentation/bloc/wallet_bloc.dart';
 
 void main() async {
   runZonedGuarded(
@@ -177,6 +178,10 @@ class MyApp extends StatelessWidget {
         ),
         BlocProvider(create: (context) => getIt<KycBloc>()),
         BlocProvider(create: (context) => getIt<OrderBloc>()),
+        BlocProvider(
+          create: (context) =>
+              getIt<WalletBloc>()..add(const WalletEvent.loadWalletData()),
+        ),
       ],
       child: BlocBuilder<ThemeCubit, ThemeMode>(
         builder: (context, themeMode) {

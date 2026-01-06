@@ -7,19 +7,20 @@ import '../../domain/entities/wallet_entity.dart';
 import '../../domain/repositories/wallet_repository.dart';
 import '../models/transaction_model.dart';
 import '../models/wallet_model.dart';
+import '../../../../core/services/blockchain_service.dart';
 
 @LazySingleton(as: WalletRepository)
 class WalletRepositoryImpl implements WalletRepository {
   final FirebaseAuth _auth;
   final FirebaseFirestore _firestore;
+  final BlockchainService _blockchainService;
 
-  WalletRepositoryImpl(this._auth, this._firestore);
+  WalletRepositoryImpl(this._auth, this._firestore, this._blockchainService);
 
   @override
   Future<List<TransactionEntity>> getTransactions() async {
     final uid = _auth.currentUser?.uid;
-    // Fallback to mock data if no user or error, to ensure UI works for demo
-    if (uid == null) return _getMockTransactions();
+    if (uid == null) return [];
 
     try {
       final snapshot = await _firestore
@@ -30,15 +31,14 @@ class WalletRepositoryImpl implements WalletRepository {
           .get();
 
       if (snapshot.docs.isEmpty) {
-        return _getMockTransactions();
+        return [];
       }
 
       return snapshot.docs
           .map((doc) => TransactionModel.fromFirestore(doc))
           .toList();
     } catch (e) {
-      // Fallback to mock on error
-      return _getMockTransactions();
+      return [];
     }
   }
 
@@ -47,19 +47,7 @@ class WalletRepositoryImpl implements WalletRepository {
   @override
   Future<void> debitWallet(double amount) async {
     final uid = _auth.currentUser?.uid;
-    // Mock logic: Update in-memory mock wallet
-    if (uid == null) {
-      _cachedWallet ??= _getMockWallet();
-      final current = _cachedWallet!;
-      if (current.balanceNgn >= amount) {
-        _cachedWallet = current.copyWith(
-          balanceNgn: current.balanceNgn - amount,
-        );
-      } else {
-        throw Exception('Insufficient funds');
-      }
-      return;
-    }
+    if (uid == null) throw Exception('User not logged in');
 
     try {
       final docRef = _firestore
@@ -74,8 +62,6 @@ class WalletRepositoryImpl implements WalletRepository {
           throw Exception('Wallet not found');
         }
 
-        // This assumes WalletModel has fromFirestore and we map it back
-        // Since WalletModel logic might be complex, we just update the field directly
         final currentBalance = snapshot.data()?['balanceNgn'] as double? ?? 0.0;
         if (currentBalance >= amount) {
           transaction.update(docRef, {'balanceNgn': currentBalance - amount});
@@ -83,95 +69,83 @@ class WalletRepositoryImpl implements WalletRepository {
           throw Exception('Insufficient funds');
         }
       });
+      // Invalidate cache
+      _cachedWallet = null;
     } catch (e) {
-      // Fallback to mock update if firestore fails
-      _cachedWallet ??= _getMockWallet();
-      final current = _cachedWallet!;
-      if (current.balanceNgn >= amount) {
-        _cachedWallet = current.copyWith(
-          balanceNgn: current.balanceNgn - amount,
-        );
-      } else {
-        throw Exception('Insufficient funds');
-      }
+      throw Exception('Debit failed: $e');
     }
   }
 
   @override
   Future<WalletEntity> getWalletBalance() async {
     final uid = _auth.currentUser?.uid;
-    // Return cached mock if set
+    if (uid == null) throw Exception('User not logged in');
+
     if (_cachedWallet != null) return _cachedWallet!;
 
-    // Fallback to mock data if no user or error
-    if (uid == null) {
-      _cachedWallet = _getMockWallet();
-      return _cachedWallet!;
-    }
-
     try {
-      final doc = await _firestore
+      final walletRef = _firestore
+          .collection('users')
+          .doc(uid)
+          .collection('wallet')
+          .doc('balance');
+
+      final doc = await walletRef.get();
+
+      if (doc.exists && doc.data() != null) {
+        _cachedWallet = WalletModel.fromFirestore(doc);
+        return _cachedWallet!;
+      } else {
+        // Create new wallet if it doesn't exist
+        return await _createWallet(uid);
+      }
+    } catch (e) {
+      // On error, attempt creation or re-fetch to be robust, or throw
+      // For now, assume if we can't fetch, we can't create, so throw.
+      throw Exception('Failed to fetch/create wallet: $e');
+    }
+  }
+
+  Future<WalletEntity> _createWallet(String uid) async {
+    try {
+      // Generate real wallet using blockchain service
+      final walletData = _blockchainService.generateWallet();
+
+      // Encrypt sensitive data
+      final encryptedMnemonic = _blockchainService.encryptData(
+        walletData['mnemonic'],
+      );
+      final encryptedSeed = _blockchainService.encryptData(walletData['seed']);
+
+      // Get addresses
+      final addresses = walletData['addresses'] as Map<String, String>;
+
+      // Create wallet model with real addresses
+      final newWallet = WalletModel(
+        balanceNgn: 0.0,
+        cryptoBalanceCcd: 0.0,
+        cryptoBalanceEth: 0.0,
+        virtualAccountNumber: 'Generating...',
+        bankName: 'Providus Bank',
+        isKycVerified: false,
+        cryptoAddresses: {'CCD': '', 'ETH': addresses['Ethereum'] ?? ''},
+        multiChainAddresses: addresses,
+        encryptedMnemonic: encryptedMnemonic,
+        encryptedSeed: encryptedSeed,
+        currentChain: 'Ethereum',
+      );
+
+      await _firestore
           .collection('users')
           .doc(uid)
           .collection('wallet')
           .doc('balance')
-          .get();
+          .set(newWallet.toJson());
 
-      if (doc.exists && doc.data() != null) {
-        return WalletModel.fromFirestore(doc);
-      } else {
-        _cachedWallet = _getMockWallet();
-        return _cachedWallet!;
-      }
+      _cachedWallet = newWallet;
+      return newWallet;
     } catch (e) {
-      _cachedWallet = _getMockWallet();
-      return _cachedWallet!;
+      throw Exception('Failed to create wallet: $e');
     }
-  }
-
-  List<TransactionEntity> _getMockTransactions() {
-    return [
-      TransactionEntity(
-        id: 'tx1',
-        amount: 5000.00,
-        type: TransactionType.credit,
-        status: TransactionStatus.completed,
-        description: 'Deposit from Bank',
-        date: DateTime.now().subtract(const Duration(minutes: 30)),
-      ),
-      TransactionEntity(
-        id: 'tx2',
-        amount: 3500.00,
-        type: TransactionType.debit,
-        status: TransactionStatus.completed,
-        description: 'Purchase: 50kg Rice',
-        date: DateTime.now().subtract(const Duration(days: 1)),
-      ),
-      TransactionEntity(
-        id: 'tx3',
-        amount: 12000.00,
-        type: TransactionType.credit,
-        status: TransactionStatus.completed,
-        description: 'Harvest Sale: Tomatoes',
-        date: DateTime.now().subtract(const Duration(days: 2)),
-      ),
-    ];
-  }
-
-  WalletEntity _getMockWallet() {
-    return const WalletEntity(
-      balanceNgn: 154300.50,
-      cryptoBalanceCcd: 1200.0,
-      cryptoBalanceEth: 0.45,
-      virtualAccountNumber: '1234567890',
-      bankName: 'Wema Bank',
-      isKycVerified: true,
-      cryptoAddresses: {'CCD': '3k...', 'ETH': '0x...'},
-      multiChainAddresses: {
-        'ERC20': '0x71C...',
-        'TRC20': 'TM7...',
-        'BEP20': '0x71C...',
-      },
-    );
   }
 }

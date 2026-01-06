@@ -7,13 +7,15 @@ import 'package:local_auth/local_auth.dart';
 import '../../../settings/data/models/user_model.dart';
 import '../../domain/entities/auth_entity.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../../../core/services/secure_storage_service.dart';
 
 @LazySingleton(as: AuthRepository)
 class AuthRepositoryImpl implements AuthRepository {
   final FirebaseAuth _firebaseAuth;
   final FirebaseFirestore _firestore;
+  final SecureStorageService _secureStorage;
 
-  AuthRepositoryImpl(this._firebaseAuth, this._firestore);
+  AuthRepositoryImpl(this._firebaseAuth, this._firestore, this._secureStorage);
 
   @override
   Future<Either<String, AuthEntity>> signIn({
@@ -36,6 +38,9 @@ class AuthRepositoryImpl implements AuthRepository {
       final userModel = UserModel.fromJson(userDoc.data()!);
       final token = await credential.user!.getIdToken();
 
+      // Save email to secure storage for biometric re-authentication
+      await _secureStorage.saveUserEmail(email);
+
       return Right(AuthEntity(user: userModel, token: token ?? ''));
     } on FirebaseAuthException catch (e) {
       return Left(e.message ?? 'Sign in failed');
@@ -52,6 +57,9 @@ class AuthRepositoryImpl implements AuthRepository {
     required String email,
     required String password,
     required String country,
+    required int age,
+    required String gender,
+    required String userType,
   }) async {
     try {
       final credential = await _firebaseAuth.createUserWithEmailAndPassword(
@@ -66,9 +74,11 @@ class AuthRepositoryImpl implements AuthRepository {
         firstName: firstName,
         lastName: lastName,
         profilePhoto: null,
-        accountType: 'User',
+        accountType: userType,
         phone: phoneNumber,
         emailActivated: false,
+        age: age,
+        gender: gender,
       );
 
       await _firestore.collection('users').doc(uid).set(userModel.toJson());
@@ -210,9 +220,16 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<String, void>> signOut() async {
     try {
       await _firebaseAuth.signOut();
+      // Clear stored credentials on sign out
+      await _secureStorage.clearAll();
       return const Right(null);
     } catch (e) {
       return Left(e.toString());
     }
+  }
+
+  /// Get stored email for biometric authentication
+  Future<String?> getStoredEmail() async {
+    return await _secureStorage.getUserEmail();
   }
 }

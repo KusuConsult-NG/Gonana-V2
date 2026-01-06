@@ -12,6 +12,8 @@ class UserEntity extends Equatable {
   final String? accountType;
   final bool? emailActivated;
   final String? kycStatus; // 'none', 'pending', 'verified'
+  final int? age;
+  final String? gender;
 
   final String? username;
   final String? pin;
@@ -28,6 +30,8 @@ class UserEntity extends Equatable {
     this.accountType,
     this.emailActivated,
     this.kycStatus,
+    this.age,
+    this.gender,
     this.username,
     this.pin,
   });
@@ -45,6 +49,8 @@ class UserEntity extends Equatable {
     accountType,
     emailActivated,
     kycStatus,
+    age,
+    gender,
     username,
     pin,
   ];
@@ -60,6 +66,8 @@ class UserEntity extends Equatable {
     String? accountType,
     bool? emailActivated,
     String? kycStatus,
+    int? age,
+    String? gender,
     String? username,
     String? pin,
   }) {
@@ -75,6 +83,8 @@ class UserEntity extends Equatable {
       accountType: accountType ?? this.accountType,
       emailActivated: emailActivated ?? this.emailActivated,
       kycStatus: kycStatus ?? this.kycStatus,
+      age: age ?? this.age,
+      gender: gender ?? this.gender,
       username: username ?? this.username,
       pin: pin ?? this.pin,
     );

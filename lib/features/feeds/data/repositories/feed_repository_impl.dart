@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:dartz/dartz.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../domain/entities/feed_entity.dart';
 import '../../domain/entities/comment_entity.dart';
@@ -11,7 +12,7 @@ import '../models/story_model.dart';
 import '../models/comment_model.dart';
 import 'dart:io';
 
-// @LazySingleton(as: FeedRepository)
+@LazySingleton(as: FeedRepository)
 class FeedRepositoryImpl implements FeedRepository {
   final FirebaseFirestore _firestore;
   final FirebaseStorage _storage;

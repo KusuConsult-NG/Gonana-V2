@@ -13,6 +13,12 @@ class WalletEntity extends Equatable {
   final Map<String, String>? multiChainAddresses; // Chain name -> Address
   final DateTime? kycVerifiedAt;
 
+  // Blockchain wallet fields
+  final String? encryptedMnemonic; // Encrypted seed phrase
+  final String? encryptedSeed; // Encrypted seed
+  final String
+  currentChain; // Current selected blockchain (Ethereum, BSC, Polygon, Tron)
+
   const WalletEntity({
     required this.balanceNgn,
     required this.cryptoBalanceCcd,
@@ -23,6 +29,9 @@ class WalletEntity extends Equatable {
     this.isKycVerified = false,
     this.multiChainAddresses,
     this.kycVerifiedAt,
+    this.encryptedMnemonic,
+    this.encryptedSeed,
+    this.currentChain = 'Ethereum',
   });
 
   WalletEntity copyWith({
@@ -35,6 +44,9 @@ class WalletEntity extends Equatable {
     bool? isKycVerified,
     Map<String, String>? multiChainAddresses,
     DateTime? kycVerifiedAt,
+    String? encryptedMnemonic,
+    String? encryptedSeed,
+    String? currentChain,
   }) {
     return WalletEntity(
       balanceNgn: balanceNgn ?? this.balanceNgn,
@@ -46,6 +58,9 @@ class WalletEntity extends Equatable {
       isKycVerified: isKycVerified ?? this.isKycVerified,
       multiChainAddresses: multiChainAddresses ?? this.multiChainAddresses,
       kycVerifiedAt: kycVerifiedAt ?? this.kycVerifiedAt,
+      encryptedMnemonic: encryptedMnemonic ?? this.encryptedMnemonic,
+      encryptedSeed: encryptedSeed ?? this.encryptedSeed,
+      currentChain: currentChain ?? this.currentChain,
     );
   }
 
@@ -60,5 +75,8 @@ class WalletEntity extends Equatable {
     isKycVerified,
     multiChainAddresses,
     kycVerifiedAt,
+    encryptedMnemonic,
+    encryptedSeed,
+    currentChain,
   ];
 }

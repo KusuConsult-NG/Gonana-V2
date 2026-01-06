@@ -13,6 +13,9 @@ abstract class AuthRepository {
     required String email,
     required String password,
     required String country,
+    required int age,
+    required String gender,
+    required String userType,
   });
   Future<Either<String, void>> forgotPassword({required String email});
   Future<Either<String, void>> signOut();
