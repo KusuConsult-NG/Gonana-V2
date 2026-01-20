@@ -129,66 +129,67 @@ class _WalletViewState extends State<_WalletView> {
                         ),
                       ),
                       const SizedBox(height: 12),
-                      ...wallet.cryptoAddresses!.entries.map((entry) {
-                        return Padding(
-                          padding: const EdgeInsets.only(bottom: 8.0),
-                          child: GlassContainer(
-                            padding: const EdgeInsets.all(12),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Row(
-                              children: [
-                                CircleAvatar(
-                                  radius: 14,
-                                  backgroundColor: AppTheme.primaryColor
-                                      .withValues(alpha: 0.2),
-                                  child: const Icon(
-                                    Icons.wallet,
-                                    size: 14,
-                                    color: AppTheme.primaryColor,
+                      if (wallet.cryptoAddresses != null)
+                        ...wallet.cryptoAddresses!.entries.map((entry) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 8.0),
+                            child: GlassContainer(
+                              padding: const EdgeInsets.all(12),
+                              borderRadius: BorderRadius.circular(12),
+                              child: Row(
+                                children: [
+                                  CircleAvatar(
+                                    radius: 14,
+                                    backgroundColor: AppTheme.primaryColor
+                                        .withValues(alpha: 0.2),
+                                    child: const Icon(
+                                      Icons.wallet,
+                                      size: 14,
+                                      color: AppTheme.primaryColor,
+                                    ),
                                   ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        entry.key,
-                                        style: GoogleFonts.montserrat(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
-                                          color: Colors.grey,
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          entry.key,
+                                          style: GoogleFonts.montserrat(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                            color: Colors.grey,
+                                          ),
                                         ),
-                                      ),
-                                      Text(
-                                        entry.value,
-                                        style: GoogleFonts.montserrat(
-                                          fontSize: 14,
-                                          fontWeight: FontWeight.w500,
-                                          color:
-                                              Theme.of(context).brightness ==
-                                                  Brightness.dark
-                                              ? Colors.white70
-                                              : Colors.black87,
+                                        Text(
+                                          entry.value,
+                                          style: GoogleFonts.montserrat(
+                                            fontSize: 14,
+                                            fontWeight: FontWeight.w500,
+                                            color:
+                                                Theme.of(context).brightness ==
+                                                    Brightness.dark
+                                                ? Colors.white70
+                                                : Colors.black87,
+                                          ),
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
-                                        maxLines: 1,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ],
+                                      ],
+                                    ),
                                   ),
-                                ),
-                                IconButton(
-                                  icon: const Icon(Icons.copy, size: 18),
-                                  onPressed: () {
-                                    // Copy to clipboard logic
-                                  },
-                                ),
-                              ],
+                                  IconButton(
+                                    icon: const Icon(Icons.copy, size: 18),
+                                    onPressed: () {
+                                      // Copy to clipboard logic
+                                    },
+                                  ),
+                                ],
+                              ),
                             ),
-                          ),
-                        );
-                      }),
+                          );
+                        }),
                       const SizedBox(height: 24),
                       FadeInLeft(
                         delay: const Duration(milliseconds: 400),

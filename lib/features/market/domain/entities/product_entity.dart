@@ -22,6 +22,7 @@ class ProductEntity extends Equatable {
   final double? shippingPrice; // For Farmer Shipping
   final int? initialStock; // For progress bar
   final int? soldCount; // For progress bar
+  final String? category;
 
   String get imageUrl => images.isNotEmpty ? images.first : '';
 
@@ -49,8 +50,6 @@ class ProductEntity extends Equatable {
     this.soldCount,
     this.category,
   });
-
-  final String? category;
 
   ProductEntity copyWith({
     String? id,

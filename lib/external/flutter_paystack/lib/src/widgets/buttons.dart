@@ -81,7 +81,7 @@ class _BaseButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     const borderRadius = BorderRadius.all(Radius.circular(5.0));
-    var textWidget = Text(
+    final textWidget = Text(
       text ?? '',
       textAlign: TextAlign.center,
       style: textStyle,

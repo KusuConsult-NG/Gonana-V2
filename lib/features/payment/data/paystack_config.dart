@@ -1,5 +1,6 @@
 class PaystackConfig {
-  // TODO: Replace with your actual Public Key from Paystack Dashboard
+  // NOTE: Currently using TEST public key
+  // PRODUCTION: Replace with your LIVE Public Key from Paystack Dashboard before deployment
   // Ideally, load this from an environment variable (e.g. using flutter_dotenv)
   static const String publicKey =
       'pk_test_3e87802dae281fbeb004f2b0f741a6e662aba103';
